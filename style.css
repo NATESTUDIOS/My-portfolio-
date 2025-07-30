@@ -1,0 +1,235 @@
+body {
+    background-color: #090C1B;
+    padding: 0;
+    margin: 0;
+    color: #efefef;
+    font-size: 15px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif
+}
+
+.topbox {
+    width: 100%;
+    margin: 4px;
+    border-radius: 14px;
+    display: grid;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+}
+
+.bckimage {
+    border-radius: 14px;
+    background-color: #0f0000;
+    height: 500px;
+    width: 100%;
+    grid-area: 1/1;
+    justify-content: center;
+    align-items: center;
+    object-fit: cover;
+}
+.shadowbox{
+  border-radius: 14px;
+  width: 100%;
+  height: 500px;
+  grid-area: 1/1;
+  background-color: #000000;
+  opacity: 70%;
+  
+}
+
+.box1 {
+    width: 100%;
+    height: 500px;
+    grid-area: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+    background-color: #000011;
+    border-radius: 14px;
+}
+
+.mainlogo {
+    height: 230px;
+    width: 230px;
+    border: 2px solid #da8517;
+    background-color: #212121;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+.name {
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.linebox {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: o;
+}
+
+.description {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.line1,
+.line2 {
+    height: 1px;
+    width: 100%;
+    background-color: #efefef;
+    flex-grow: 1;
+}
+
+.aboutbox {
+    margin-top: 150px;
+}
+
+.description2 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.groupgrid {
+    display: grid;
+    grid-template-rows: 2fr 2fr;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: 2fr 2fr;
+    gap: 9px;
+    padding: 20px;
+    margin-bottom: 30px;
+
+
+}
+
+.groupcard {
+    border-radius: 9px;
+    border: 1px solid #0e1433;
+    background-color: #010416;
+    flex-grow: 1;
+    padding: 8px;
+}
+
+.groupicon {
+    height: 40px;
+    width: 40px;
+    padding: 10px;
+    margin: 8px;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    border-radius: 7px;
+    text-align: center;
+    background-color: #031818;
+    object-fit: cover;
+}
+
+.groupheading {
+    padding: 4px;
+    padding-bottom: 0;
+    margin: 0;
+    font-weight: 600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.groupdescription {
+    padding: 4px;
+    padding-top: 0;
+    margin: 0;
+    font-weight: 300;
+    font-size: 9px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.projectlist {
+    padding: 15px;
+    gap: 10px;
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    align-items: center;
+}
+
+.projectcard {
+    background-color: #010416;
+    border: 1px solid #0e1433;
+    width: 300px;
+    border-radius: 10px;
+}
+
+
+.projectimage {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    height: 270px;
+    width: 300px;
+    object-fit: cover;
+}
+
+.projectheading {
+    padding: 12px;
+    padding-bottom: 0;
+    margin: 0;
+    font-weight: 600;
+    font-size: 17px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+}
+
+.projectdescription {
+    padding: 12px;
+    padding-top: 0;
+    margin: 0;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+}
+
+.box2 {
+    width: 100%;
+    padding: 8px;
+    display: flex;
+    justify-content: right;
+}
+
+.projectview-button {
+    padding: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-right: 16px;
+    border-radius: 30px;
+    background-color: #da8517;
+    color: #efefef;
+    border: 2px solid #666666;
+}
+.footer{
+    background-color: #031818;
+    width: 100%;
+    padding: 8px;
+    padding-top: 80px;
+    text-align: center;
+}
+.text1{
+    font-weight: 600;
+    font-size: 17px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.box3{
+    display: flex;
+    text-align: center;
+    padding: 0;
+}
+.text2{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    flex-grow: 1;
+    text-align: center;
+}
