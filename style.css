@@ -64,7 +64,7 @@ body {
   height: 230px;
   width: 230px;
   border: 2px solid #da8517;
-  background-color: var(--stroke);
+  background-color: var(--line);
   border-radius: 100%;
   object-fit: cover;
 }
