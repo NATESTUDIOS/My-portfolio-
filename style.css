@@ -37,6 +37,7 @@ body {
   align-items: center;
   object-fit: cover;
   z-index: 0;
+  object-fit: cover;
 
 }
 .shadowbox {
