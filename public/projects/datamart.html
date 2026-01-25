@@ -1018,479 +1018,695 @@
     </div>
 
     <script>
-        // Base URL for the location API
-        const API_BASE_URL = 'https://mytalknote.vercel.app/api/location';
-        
-        // Store location data
-        let userLocation = null;
-        let userFingerprint = null;
-        
-        // Sample product categories
-        const categories = [
-            'Electronics', 'Fashion', 'Home & Garden', 'Beauty', 'Sports', 
-            'Books', 'Toys', 'Automotive', 'Health', 'Groceries'
-        ];
-        
-        // Sample products data
-        const products = [
-            { id: 1, name: 'Wireless Bluetooth Headphones', category: 'Electronics', price: 89.99, description: 'Premium noise-cancelling headphones with 30-hour battery life.' },
-            { id: 2, name: 'Organic Cotton T-Shirt', category: 'Fashion', price: 24.99, description: 'Sustainable and comfortable everyday essential.' },
-            { id: 3, name: 'Smart Home Speaker', category: 'Electronics', price: 129.99, description: 'Voice-controlled speaker with premium sound quality.' },
-            { id: 4, name: 'Yoga Mat Premium', category: 'Sports', price: 39.99, description: 'Non-slip mat with alignment markers for perfect poses.' },
-            { id: 5, name: 'Designer Coffee Table', category: 'Home & Garden', price: 249.99, description: 'Modern minimalist design with sustainable wood.' },
-            { id: 6, name: 'Skincare Set', category: 'Beauty', price: 59.99, description: 'Complete daily routine with natural ingredients.' },
-            { id: 7, name: 'Fitness Tracker Watch', category: 'Sports', price: 199.99, description: 'Track workouts, sleep, and heart rate accurately.' },
-            { id: 8, name: 'Professional Camera', category: 'Electronics', price: 899.99, description: 'Capture stunning photos with advanced features.' }
-        ];
+    const API_BASE_URL = 'https://mytalknote.vercel.app/api/location';
+    
+    // Store location data
+    let userLocation = null;
+    let userFingerprint = null;
+    
+    // Sample product categories
+    const categories = [
+        'Electronics', 'Fashion', 'Home & Garden', 'Beauty', 'Sports', 
+        'Books', 'Toys', 'Automotive', 'Health', 'Groceries'
+    ];
+    
+    // Sample products data
+    const products = [
+        { id: 1, name: 'Wireless Bluetooth Headphones', category: 'Electronics', price: 89.99, description: 'Premium noise-cancelling headphones with 30-hour battery life.' },
+        { id: 2, name: 'Organic Cotton T-Shirt', category: 'Fashion', price: 24.99, description: 'Sustainable and comfortable everyday essential.' },
+        { id: 3, name: 'Smart Home Speaker', category: 'Electronics', price: 129.99, description: 'Voice-controlled speaker with premium sound quality.' },
+        { id: 4, name: 'Yoga Mat Premium', category: 'Sports', price: 39.99, description: 'Non-slip mat with alignment markers for perfect poses.' },
+        { id: 5, name: 'Designer Coffee Table', category: 'Home & Garden', price: 249.99, description: 'Modern minimalist design with sustainable wood.' },
+        { id: 6, name: 'Skincare Set', category: 'Beauty', price: 59.99, description: 'Complete daily routine with natural ingredients.' },
+        { id: 7, name: 'Fitness Tracker Watch', category: 'Sports', price: 199.99, description: 'Track workouts, sleep, and heart rate accurately.' },
+        { id: 8, name: 'Professional Camera', category: 'Electronics', price: 899.99, description: 'Capture stunning photos with advanced features.' }
+    ];
 
-        // DOM Elements
-        const locationModal = document.getElementById('locationModal');
-        const locationDisplay = document.getElementById('locationDisplay');
-        const productsGrid = document.getElementById('productsGrid');
-        const loader = document.getElementById('loader');
-        const loaderText = document.getElementById('loaderText');
-        const notification = document.getElementById('notification');
-        const notificationTitle = document.getElementById('notificationTitle');
-        const notificationMessage = document.getElementById('notificationMessage');
+    // DOM Elements
+    const locationModal = document.getElementById('locationModal');
+    const locationDisplay = document.getElementById('locationDisplay');
+    const productsGrid = document.getElementById('productsGrid');
+    const loader = document.getElementById('loader');
+    const loaderText = document.getElementById('loaderText');
+    const notification = document.getElementById('notification');
+    const notificationTitle = document.getElementById('notificationTitle');
+    const notificationMessage = document.getElementById('notificationMessage');
 
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show location modal after a short delay
-            setTimeout(() => {
-                showLocationModal();
-            }, 1500);
-            
-            // Load products
-            loadProducts();
-            
-            // Setup event listeners
-            setupEventListeners();
-        });
-
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show location modal after a short delay
+        setTimeout(() => {
+            showLocationModal();
+        }, 1500);
+        
+        // Load products
+        loadProducts();
+        
         // Setup event listeners
-        function setupEventListeners() {
-            // Location modal buttons
-            document.getElementById('allowLocation').addEventListener('click', getDeviceLocation);
-            document.getElementById('skipLocation').addEventListener('click', skipLocation);
-            
-            // Notification click to hide
-            notification.addEventListener('click', () => {
-                notification.classList.remove('show');
-            });
-            
-            // Add to cart buttons will be set up when products are loaded
-        }
+        setupEventListeners();
+    });
 
-        // Show location modal
-        function showLocationModal() {
-            locationModal.style.display = 'flex';
-        }
+    // Setup event listeners
+    function setupEventListeners() {
+        // Location modal buttons - UPDATED: Use new location detection
+        document.getElementById('allowLocation').addEventListener('click', detectUserLocation);
+        document.getElementById('skipLocation').addEventListener('click', skipLocation);
+        
+        // Notification click to hide
+        notification.addEventListener('click', () => {
+            notification.classList.remove('show');
+        });
+        
+        // Add to cart buttons will be set up when products are loaded
+    }
 
-        // Hide location modal
-        function hideLocationModal() {
-            locationModal.style.display = 'none';
-        }
+    // Show location modal
+    function showLocationModal() {
+        locationModal.style.display = 'flex';
+    }
 
-        // Show loader
-        function showLoader(text = 'Personalizing your shopping experience...') {
-            loaderText.textContent = text;
-            loader.classList.add('show');
-        }
+    // Hide location modal
+    function hideLocationModal() {
+        locationModal.style.display = 'none';
+    }
 
-        // Hide loader
-        function hideLoader() {
-            loader.classList.remove('show');
-        }
+    // Show loader
+    function showLoader(text = 'Personalizing your shopping experience...') {
+        loaderText.textContent = text;
+        loader.classList.add('show');
+    }
 
-        // Show notification
-        function showNotification(title, message) {
-            notificationTitle.textContent = title;
-            notificationMessage.textContent = message;
-            notification.classList.add('show');
-            
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 5000);
-        }
+    // Hide loader
+    function hideLoader() {
+        loader.classList.remove('show');
+    }
 
-        // Get device location
-        function getDeviceLocation() {
-            showLoader('Accessing your location for personalized shopping...');
-            
-            if (!navigator.geolocation) {
-                // Fallback to IP-based location
-                getIPLocation();
+    // Show notification
+    function showNotification(title, message) {
+        notificationTitle.textContent = title;
+        notificationMessage.textContent = message;
+        notification.classList.add('show');
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 5000);
+    }
+
+    // =============================
+    // IMPROVED LOCATION DETECTION
+    // =============================
+
+    // Main location detection function with multiple fallbacks
+    async function detectUserLocation() {
+        showLoader('Detecting your location for personalized shopping...');
+        
+        try {
+            // Method 1: Try high-accuracy GPS first
+            const gpsLocation = await getGPSCoordinates();
+            if (gpsLocation && gpsLocation.accuracy < 1000) {
+                // Good accuracy, use it
+                await processLocation(gpsLocation, 'gps-high-accuracy');
                 return;
             }
+            
+            // Method 2: Try HTML5 Geolocation (less accurate but faster)
+            const html5Location = await getHTML5Location();
+            if (html5Location) {
+                await processLocation(html5Location, 'html5-geolocation');
+                return;
+            }
+            
+            // Method 3: Fallback to IP-based location
+            await getIPLocation();
+            
+        } catch (error) {
+            console.log('All location methods failed:', error);
+            // Final fallback: use default location
+            useDefaultLocation();
+        }
+    }
 
+    // Get GPS coordinates with better error handling
+    function getGPSCoordinates() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'));
+                return;
+            }
+            
+            // First try with high accuracy
             navigator.geolocation.getCurrentPosition(
-                // Success callback
-                async (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    
-                    // Send device location to API
-                    await sendDeviceLocation({
-                        latitude,
-                        longitude,
-                        accuracy,
-                        source: 'device-geolocation'
+                (position) => {
+                    const coords = position.coords;
+                    resolve({
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        accuracy: coords.accuracy,
+                        altitude: coords.altitude,
+                        heading: coords.heading,
+                        speed: coords.speed
                     });
+                },
+                (error) => {
+                    // Try again with lower accuracy setting (works better indoors)
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const coords = position.coords;
+                            resolve({
+                                latitude: coords.latitude,
+                                longitude: coords.longitude,
+                                accuracy: coords.accuracy,
+                                source: 'gps-low-accuracy'
+                            });
+                        },
+                        () => reject(error),  // Both attempts failed
+                        { enableHighAccuracy: false, timeout: 10000 }
+                    );
+                },
+                { 
+                    enableHighAccuracy: true,
+                    timeout: 15000,  // Increased timeout for phones
+                    maximumAge: 300000  // 5 minutes cache
+                }
+            );
+        });
+    }
+
+    // Alternative: HTML5 geolocation API (different approach)
+    function getHTML5Location() {
+        return new Promise((resolve) => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        source: 'html5-api'
+                    }),
+                    () => resolve(null),  // Silently fail
+                    { enableHighAccuracy: false, timeout: 8000 }
+                );
+            } else {
+                resolve(null);
+            }
+        });
+    }
+
+    // Process and display location
+    async function processLocation(locationData, source) {
+        // Get city/country info from coordinates (reverse geocoding simulation)
+        const locationInfo = await getLocationInfoFromCoords(locationData);
+        
+        userLocation = {
+            city: locationInfo.city || 'Your Area',
+            country: locationInfo.country || '',
+            location: {
+                coordinates: {
+                    latitude: locationData.latitude,
+                    longitude: locationData.longitude
+                }
+            }
+        };
+        
+        // Send to your API
+        await sendDeviceLocation({
+            ...locationData,
+            source: source,
+            city: locationInfo.city,
+            country: locationInfo.country
+        });
+        
+        // Update UI
+        updateLocationDisplay(userLocation);
+        updateLocationDetails(userLocation);
+        
+        // Show accuracy info if available
+        if (locationData.accuracy) {
+            showAccuracyInfo(locationData.accuracy);
+        }
+        
+        hideLoader();
+        hideLocationModal();
+        
+        // Show accuracy-based message
+        const accuracyMsg = locationData.accuracy ? 
+            `Accuracy: ~${Math.round(locationData.accuracy)}m` : 
+            'Approximate location';
+        
+        showNotification(
+            'Location Detected!',
+            `${accuracyMsg}. Personalizing your shopping experience.`
+        );
+        
+        loadProductsBasedOnLocation();
+    }
+
+    // Get location from IP (with fallback for API issues)
+    async function getIPLocation() {
+        try {
+            showLoader('Getting approximate location from IP...');
+            
+            // Try your API first
+            const response = await fetch(API_BASE_URL);
+            const data = await response.json();
+            
+            if (data.success) {
+                userLocation = data.visitor;
+                userFingerprint = data.visitor.fingerprint;
+                
+                updateLocationDisplay(data.visitor);
+                updateLocationDetails(data.visitor);
+                
+                hideLoader();
+                hideLocationModal();
+                
+                showNotification(
+                    'Location Detected',
+                    'Using IP-based location for personalized shopping.'
+                );
+                
+                loadProductsBasedOnLocation();
+                return;
+            }
+        } catch (error) {
+            console.log('API location failed, using simulated data:', error);
+        }
+        
+        // Fallback: Use simulated location data
+        await simulateIPLocation();
+    }
+
+    // Simulate IP location (for when API is down)
+    async function simulateIPLocation() {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Major cities for simulation
+        const cities = [
+            { city: 'New York', country: 'United States', lat: 40.7128, lng: -74.0060 },
+            { city: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278 },
+            { city: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503 },
+            { city: 'Sydney', country: 'Australia', lat: -33.8688, lng: 151.2093 },
+            { city: 'San Francisco', country: 'United States', lat: 37.7749, lng: -122.4194 }
+        ];
+        
+        const randomCity = cities[Math.floor(Math.random() * cities.length)];
+        
+        userLocation = {
+            city: randomCity.city,
+            country: randomCity.country,
+            location: {
+                coordinates: {
+                    latitude: randomCity.lat,
+                    longitude: randomCity.lng
+                }
+            }
+        };
+        
+        userFingerprint = 'fp_sim_' + Date.now() + Math.random().toString(36).substr(2, 9);
+        
+        updateLocationDisplay(userLocation);
+        updateLocationDetails(userLocation);
+        hideLoader();
+        hideLocationModal();
+        
+        showNotification(
+            'Demo Mode',
+            `Using simulated location (${randomCity.city}) for demonstration.`
+        );
+        
+        loadProductsBasedOnLocation();
+    }
+
+    // Get location info from coordinates (simulated reverse geocoding)
+    async function getLocationInfoFromCoords(coords) {
+        // In a real app, you would call a reverse geocoding API here
+        // For demo purposes, return simulated data
+        
+        // Major cities coordinates
+        const citiesDB = [
+            { lat: 40.7128, lng: -74.0060, city: 'New York', country: 'United States' },
+            { lat: 51.5074, lng: -0.1278, city: 'London', country: 'United Kingdom' },
+            { lat: 48.8566, lng: 2.3522, city: 'Paris', country: 'France' },
+            { lat: 35.6762, lng: 139.6503, city: 'Tokyo', country: 'Japan' },
+            { lat: 37.7749, lng: -122.4194, city: 'San Francisco', country: 'United States' },
+            { lat: 34.0522, lng: -118.2437, city: 'Los Angeles', country: 'United States' },
+            { lat: 41.8781, lng: -87.6298, city: 'Chicago', country: 'United States' }
+        ];
+        
+        // Find closest city (simplified calculation)
+        let closestCity = null;
+        let minDistance = Infinity;
+        
+        for (const city of citiesDB) {
+            const distance = Math.sqrt(
+                Math.pow(city.lat - coords.latitude, 2) + 
+                Math.pow(city.lng - coords.longitude, 2)
+            );
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCity = city;
+            }
+        }
+        
+        return closestCity || { city: 'Unknown City', country: 'Unknown Country' };
+    }
+
+    // Default fallback location
+    function useDefaultLocation() {
+        hideLoader();
+        hideLocationModal();
+        
+        userLocation = {
+            city: 'Select City',
+            country: 'Select Country',
+            location: null
+        };
+        
+        updateLocationDisplay(userLocation);
+        showNotification(
+            'Manual Location',
+            'Please select your location manually for best results.'
+        );
+        
+        loadProducts();
+    }
+
+    // Show accuracy info in modal
+    function showAccuracyInfo(accuracyMeters) {
+        const detailsElement = document.getElementById('locationDetails');
+        if (detailsElement && accuracyMeters) {
+            // Remove existing accuracy line if present
+            const existingAccuracy = detailsElement.querySelector('.location-accuracy');
+            if (existingAccuracy) {
+                existingAccuracy.remove();
+            }
+            
+            // Add accuracy line
+            const accuracyLine = document.createElement('div');
+            accuracyLine.className = 'location-item location-accuracy';
+            accuracyLine.innerHTML = `
+                <span class="location-label">Accuracy:</span>
+                <span class="location-value">~${Math.round(accuracyMeters)} meters</span>
+            `;
+            
+            // Insert after country
+            const countryItem = detailsElement.querySelector('#detailCountry').closest('.location-item');
+            if (countryItem) {
+                countryItem.parentNode.insertBefore(accuracyLine, countryItem.nextSibling);
+            }
+        }
+    }
+
+    // Send device location to API
+    async function sendDeviceLocation(locationData) {
+        try {
+            const deviceName = `DataMart-Shopper-${Date.now().toString(36).substr(2, 6)}`;
+            
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    deviceName: deviceName,
+                    latitude: locationData.latitude,
+                    longitude: locationData.longitude,
+                    accuracy: locationData.accuracy || 100,
+                    source: locationData.source || 'datamart-web',
+                    city: locationData.city,
+                    country: locationData.country,
+                    deviceInfo: {
+                        platform: navigator.platform,
+                        browser: getBrowserName(),
+                        screen: `${window.screen.width}x${window.screen.height}`
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.fingerprint) {
+                userFingerprint = data.fingerprint;
+                
+                // Store fingerprint in localStorage for future visits
+                localStorage.setItem('datamart_fingerprint', data.fingerprint);
+                localStorage.setItem('datamart_device_name', deviceName);
+                
+                // Show notification about data collection
+                setTimeout(() => {
+                    showNotification(
+                        'Personalization Complete',
+                        'Your shopping preferences have been saved for future visits.'
+                    );
+                }, 2000);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Failed to send location data:', error);
+            return null;
+        }
+    }
+
+    // Skip location
+    function skipLocation() {
+        hideLocationModal();
+        
+        // Use default location
+        userLocation = {
+            city: 'Select City',
+            country: 'Select Country',
+            location: null
+        };
+        
+        updateLocationDisplay(userLocation);
+        showNotification(
+            'Browse Anonymously',
+            'You can enable location services anytime for personalized shopping.'
+        );
+    }
+
+    // Update location display in header
+    function updateLocationDisplay(locationData) {
+        if (locationData && locationData.location) {
+            const city = locationData.location.city || 'Your Area';
+            const country = locationData.location.country || '';
+            
+            locationDisplay.innerHTML = `
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Shopping in <strong>${city}</strong>${country ? `, ${country}` : ''}</span>
+            `;
+            
+            // Update page title with location
+            document.title = `DataMart - Shopping in ${city}`;
+        }
+    }
+
+    // Update location details in modal
+    function updateLocationDetails(locationData) {
+        const detailsElement = document.getElementById('locationDetails');
+        if (locationData && locationData.location) {
+            detailsElement.style.display = 'block';
+            
+            document.getElementById('detailCity').textContent = locationData.location.city || 'Not detected';
+            document.getElementById('detailCountry').textContent = locationData.location.country || 'Not detected';
+            
+            // Simulate local deals based on city
+            const deals = locationData.location.city ? 
+                `${getRandomNumber(5, 15)} exclusive local deals available` : 
+                'Enable location for local deals';
+            document.getElementById('detailDeals').textContent = deals;
+        }
+    }
+
+    // Load products
+    function loadProducts() {
+        productsGrid.innerHTML = '';
+        
+        products.forEach((product, index) => {
+            const productElement = document.createElement('div');
+            productElement.className = 'product-card';
+            
+            // Add location-based badge for some products
+            const badge = userLocation && userLocation.city && userLocation.city !== 'Select City' ? 
+                `<div class="product-badge">Available in ${userLocation.city}</div>` : '';
+            
+            // Use Picsum for random product images
+            const imageUrl = `https://picsum.photos/800/600?random=${product.id}`;
+            
+            productElement.innerHTML = `
+                ${badge}
+                <div class="product-image">
+                    <img src="${imageUrl}" alt="${product.name}" loading="lazy">
+                </div>
+                <div class="product-content">
+                    <div class="product-category">${product.category}</div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <p class="product-description">${product.description}</p>
+                    <div class="product-footer">
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <button class="add-to-cart" data-product-id="${product.id}">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            productsGrid.appendChild(productElement);
+        });
+        
+        // Setup add to cart buttons
+        setupAddToCartButtons();
+    }
+
+    // Load products based on location
+    function loadProductsBasedOnLocation() {
+        // Simulate location-based product filtering
+        if (userLocation && userLocation.location && userLocation.location.city && userLocation.city !== 'Select City') {
+            // Add location-specific message
+            const header = document.querySelector('.section-header p');
+            if (header) {
+                header.textContent = `Handpicked items available in ${userLocation.location.city} based on local trends`;
+            }
+            
+            // Show notification about location-based filtering
+            setTimeout(() => {
+                showNotification(
+                    'Local Products Found',
+                    `Showing items available in ${userLocation.location.city} with special local deals`
+                );
+            }, 1000);
+        }
+        
+        loadProducts();
+    }
+
+    // Setup add to cart buttons
+    function setupAddToCartButtons() {
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.getAttribute('data-product-id');
+                const product = products.find(p => p.id === parseInt(productId));
+                
+                // Show loading on button
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                this.disabled = true;
+                
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                // Track the cart addition with location data if available
+                if (userFingerprint) {
+                    try {
+                        // Send cart activity to location API
+                        await fetch(`${API_BASE_URL}?fingerprint=${userFingerprint}`);
+                    } catch (error) {
+                        console.log('Cart tracking failed:', error);
+                    }
+                }
+                
+                // Restore button
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                
+                // Show success notification
+                showNotification(
+                    'Added to Cart!',
+                    `${product.name} has been added to your shopping cart.`
+                );
+                
+                // Update cart icon
+                updateCartIcon();
+            });
+        });
+    }
+
+    // Update cart icon
+    function updateCartIcon() {
+        const cartIcon = document.querySelector('.fa-shopping-cart');
+        if (cartIcon) {
+            // Add animation
+            cartIcon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cartIcon.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }
+
+    // Get browser name
+    function getBrowserName() {
+        const userAgent = navigator.userAgent;
+        if (userAgent.includes('Chrome')) return 'Chrome';
+        if (userAgent.includes('Firefox')) return 'Firefox';
+        if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+        if (userAgent.includes('Edge')) return 'Edge';
+        return 'Unknown';
+    }
+
+    // Helper: Get random number
+    function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Simulate user activity to send periodic updates
+    function simulateUserActivity() {
+        setInterval(() => {
+            if (userFingerprint) {
+                // Send heartbeat to keep session alive
+                fetch(`${API_BASE_URL}?fingerprint=${userFingerprint}`)
+                    .catch(() => {
+                        // Silently fail, this is just background activity
+                    });
+            }
+        }, 300000); // Every 5 minutes
+    }
+
+    // Start user activity simulation
+    simulateUserActivity();
+
+    // Check for existing fingerprint
+    const existingFingerprint = localStorage.getItem('datamart_fingerprint');
+    if (existingFingerprint) {
+        userFingerprint = existingFingerprint;
+        
+        // Try to get existing data
+        fetch(`${API_BASE_URL}?fingerprint=${existingFingerprint}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.locations && data.locations.length > 0) {
+                    // Use the most recent location
+                    const latestLocation = data.locations[0];
+                    userLocation = {
+                        city: latestLocation.city,
+                        country: latestLocation.country,
+                        location: {
+                            coordinates: {
+                                latitude: latestLocation.latitude,
+                                longitude: latestLocation.longitude
+                            }
+                        }
+                    };
                     
-                    // Also get IP location for city/country info
-                    await getIPLocation();
-                    
-                    hideLoader();
-                    hideLocationModal();
-                    
-                    // Show personalized products
+                    updateLocationDisplay(userLocation);
                     loadProductsBasedOnLocation();
                     
                     showNotification(
-                        'Welcome to DataMart!',
-                        'Your shopping experience has been personalized for your location.'
+                        'Welcome Back!',
+                        'Continuing your personalized shopping experience.'
                     );
-                },
-                // Error callback
-                (error) => {
-                    console.log('Device geolocation failed:', error.message);
-                    // Fallback to IP location
-                    getIPLocation();
-                },
-                // Options
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+                    
+                    // Don't show modal for returning users
+                    hideLocationModal();
                 }
-            );
-        }
-
-        // Get location from IP
-        async function getIPLocation() {
-            try {
-                const response = await fetch(API_BASE_URL);
-                const data = await response.json();
-                
-                if (data.success) {
-                    userLocation = data.visitor;
-                    userFingerprint = data.visitor.fingerprint;
-                    
-                    // Update location display
-                    updateLocationDisplay(data.visitor);
-                    
-                    // Update modal details
-                    updateLocationDetails(data.visitor);
-                    
-                    // Send a more accurate location if we have it
-                    if (!userLocation.latitude && data.visitor.location?.coordinates) {
-                        await sendDeviceLocation({
-                            latitude: data.visitor.location.coordinates.latitude,
-                            longitude: data.visitor.location.coordinates.longitude,
-                            source: 'ip-geolocation',
-                            city: data.visitor.location.city,
-                            country: data.visitor.location.country
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('IP location fetch failed:', error);
-                // Use default location
-                userLocation = {
-                    city: 'New York',
-                    country: 'United States',
-                    location: {
-                        coordinates: { latitude: 40.7128, longitude: -74.0060 }
-                    }
-                };
-                updateLocationDisplay(userLocation);
-            }
-        }
-
-        // Send device location to API
-        async function sendDeviceLocation(locationData) {
-            try {
-                const deviceName = `DataMart-Shopper-${Date.now().toString(36).substr(2, 6)}`;
-                
-                const response = await fetch(API_BASE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        deviceName: deviceName,
-                        latitude: locationData.latitude,
-                        longitude: locationData.longitude,
-                        accuracy: locationData.accuracy || 100,
-                        source: locationData.source || 'datamart-web',
-                        city: locationData.city,
-                        country: locationData.country,
-                        deviceInfo: {
-                            platform: navigator.platform,
-                            browser: getBrowserName(),
-                            screen: `${window.screen.width}x${window.screen.height}`
-                        }
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success && data.fingerprint) {
-                    userFingerprint = data.fingerprint;
-                    
-                    // Store fingerprint in localStorage for future visits
-                    localStorage.setItem('datamart_fingerprint', data.fingerprint);
-                    localStorage.setItem('datamart_device_name', deviceName);
-                    
-                    // Show notification about data collection
-                    setTimeout(() => {
-                        showNotification(
-                            'Personalization Complete',
-                            'Your shopping preferences have been saved for future visits.'
-                        );
-                    }, 2000);
-                }
-                
-                return data;
-            } catch (error) {
-                console.error('Failed to send location data:', error);
-                return null;
-            }
-        }
-
-        // Skip location
-        function skipLocation() {
-            hideLocationModal();
-            
-            // Use default location
-            userLocation = {
-                city: 'Select City',
-                country: 'Select Country',
-                location: null
-            };
-            
-            updateLocationDisplay(userLocation);
-            showNotification(
-                'Browse Anonymously',
-                'You can enable location services anytime for personalized shopping.'
-            );
-        }
-
-        // Update location display in header
-        function updateLocationDisplay(locationData) {
-            if (locationData && locationData.location) {
-                const city = locationData.location.city || 'Your Area';
-                const country = locationData.location.country || '';
-                
-                locationDisplay.innerHTML = `
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>Shopping in <strong>${city}</strong>${country ? `, ${country}` : ''}</span>
-                `;
-                
-                // Update page title with location
-                document.title = `DataMart - Shopping in ${city}`;
-            }
-        }
-
-        // Update location details in modal
-        function updateLocationDetails(locationData) {
-            const detailsElement = document.getElementById('locationDetails');
-            if (locationData && locationData.location) {
-                detailsElement.style.display = 'block';
-                
-                document.getElementById('detailCity').textContent = locationData.location.city || 'Not detected';
-                document.getElementById('detailCountry').textContent = locationData.location.country || 'Not detected';
-                
-                // Simulate local deals based on city
-                const deals = locationData.location.city ? 
-                    `${getRandomNumber(5, 15)} exclusive local deals available` : 
-                    'Enable location for local deals';
-                document.getElementById('detailDeals').textContent = deals;
-            }
-        }
-
-        // Load products
-        function loadProducts() {
-            productsGrid.innerHTML = '';
-            
-            products.forEach((product, index) => {
-                const productElement = document.createElement('div');
-                productElement.className = 'product-card';
-                
-                // Add location-based badge for some products
-                const badge = userLocation && userLocation.city ? 
-                    `<div class="product-badge">Available in ${userLocation.city}</div>` : '';
-                
-                // Use Picsum for random product images
-                const imageUrl = `https://picsum.photos/800/600?random=${product.id}`;
-                
-                productElement.innerHTML = `
-                    ${badge}
-                    <div class="product-image">
-                        <img src="${imageUrl}" alt="${product.name}" loading="lazy">
-                    </div>
-                    <div class="product-content">
-                        <div class="product-category">${product.category}</div>
-                        <h3 class="product-title">${product.name}</h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-footer">
-                            <div class="product-price">$${product.price.toFixed(2)}</div>
-                            <button class="add-to-cart" data-product-id="${product.id}">
-                                <i class="fas fa-cart-plus"></i> Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                productsGrid.appendChild(productElement);
+            })
+            .catch(() => {
+                // Proceed with normal flow
             });
-            
-            // Setup add to cart buttons
-            setupAddToCartButtons();
-        }
-
-        // Load products based on location
-        function loadProductsBasedOnLocation() {
-            // Simulate location-based product filtering
-            if (userLocation && userLocation.location && userLocation.location.city) {
-                // Add location-specific message
-                const header = document.querySelector('.section-header p');
-                if (header) {
-                    header.textContent = `Handpicked items available in ${userLocation.location.city} based on local trends`;
-                }
-                
-                // Show notification about location-based filtering
-                setTimeout(() => {
-                    showNotification(
-                        'Local Products Found',
-                        `Showing items available in ${userLocation.location.city} with special local deals`
-                    );
-                }, 1000);
-            }
-            
-            loadProducts();
-        }
-
-        // Setup add to cart buttons
-        function setupAddToCartButtons() {
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const productId = this.getAttribute('data-product-id');
-                    const product = products.find(p => p.id === parseInt(productId));
-                    
-                    // Show loading on button
-                    const originalHTML = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-                    this.disabled = true;
-                    
-                    // Simulate API call delay
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                    
-                    // Track the cart addition with location data if available
-                    if (userFingerprint) {
-                        try {
-                            // Send cart activity to location API
-                            await fetch(`${API_BASE_URL}?fingerprint=${userFingerprint}`);
-                        } catch (error) {
-                            console.log('Cart tracking failed:', error);
-                        }
-                    }
-                    
-                    // Restore button
-                    this.innerHTML = originalHTML;
-                    this.disabled = false;
-                    
-                    // Show success notification
-                    showNotification(
-                        'Added to Cart!',
-                        `${product.name} has been added to your shopping cart.`
-                    );
-                    
-                    // Update cart icon
-                    updateCartIcon();
-                });
-            });
-        }
-
-        // Update cart icon
-        function updateCartIcon() {
-            const cartIcon = document.querySelector('.fa-shopping-cart');
-            if (cartIcon) {
-                // Add animation
-                cartIcon.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    cartIcon.style.transform = 'scale(1)';
-                }, 300);
-            }
-        }
-
-        // Get browser name
-        function getBrowserName() {
-            const userAgent = navigator.userAgent;
-            if (userAgent.includes('Chrome')) return 'Chrome';
-            if (userAgent.includes('Firefox')) return 'Firefox';
-            if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
-            if (userAgent.includes('Edge')) return 'Edge';
-            return 'Unknown';
-        }
-
-        // Helper: Get random number
-        function getRandomNumber(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        // Simulate user activity to send periodic updates
-        function simulateUserActivity() {
-            setInterval(() => {
-                if (userFingerprint) {
-                    // Send heartbeat to keep session alive
-                    fetch(`${API_BASE_URL}?fingerprint=${userFingerprint}`)
-                        .catch(() => {
-                            // Silently fail, this is just background activity
-                        });
-                }
-            }, 300000); // Every 5 minutes
-        }
-
-        // Start user activity simulation
-        simulateUserActivity();
-
-        // Check for existing fingerprint
-        const existingFingerprint = localStorage.getItem('datamart_fingerprint');
-        if (existingFingerprint) {
-            userFingerprint = existingFingerprint;
-            
-            // Try to get existing data
-            fetch(`${API_BASE_URL}?fingerprint=${existingFingerprint}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.locations && data.locations.length > 0) {
-                        // Use the most recent location
-                        const latestLocation = data.locations[0];
-                        userLocation = {
-                            city: latestLocation.city,
-                            country: latestLocation.country,
-                            location: {
-                                coordinates: {
-                                    latitude: latestLocation.latitude,
-                                    longitude: latestLocation.longitude
-                                }
-                            }
-                        };
-                        
-                        updateLocationDisplay(userLocation);
-                        loadProductsBasedOnLocation();
-                        
-                        showNotification(
-                            'Welcome Back!',
-                            'Continuing your personalized shopping experience.'
-                        );
-                    }
-                })
-                .catch(() => {
-                    // Proceed with normal flow
-                });
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
