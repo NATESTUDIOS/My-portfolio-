@@ -1,5 +1,5 @@
 # My-portfolio system
-A sample portfolio site
+##More than a sample portfolio site, but a full comprehensive system for managing my portfolio
 
 
-https://myexploits.vercel app
+https://myexploits.vercel.app
