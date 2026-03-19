@@ -11,10 +11,6 @@
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     },
     {
-      "src": "^/notes/([^/]+)/?$",
-      "dest": "/public/note.html"
-    },
-    {
       "src": "^/([^/.]+)$",
       "dest": "/public/$1.html",
       "check": true
