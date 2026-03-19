@@ -8,12 +8,7 @@
     "firebase-admin": "^11.11.0",
     "crypto": "^1.0.1"
   },
-  "devDependencies": {
-    "vercel": "^32.0.0"
-  },
-  "engines": {
-    "node": "18.x"
-  },
+  {
  
   "author": "Natestudios"
 }
