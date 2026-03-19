@@ -10,7 +10,10 @@
       "dest": "/api/$1.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     },
-    
+    {
+      "src": "^/notes/([^/]+)/?$",
+      "dest": "/public/note.html"
+    },
     {
       "src": "^/([^/.]+)$",
       "dest": "/public/$1.html",
