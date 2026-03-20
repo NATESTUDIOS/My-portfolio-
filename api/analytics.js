@@ -1,6 +1,6 @@
 // api/analytics.js
-import { db } from "../utils/firebase";
-import { verifyToken } from "./auth";
+import { db } from "../utils/firebase.js";
+import { verifyToken } from "./auth.js";
 import crypto from 'crypto';
 
 const BASE_URL = process.env.BASE_URL;
