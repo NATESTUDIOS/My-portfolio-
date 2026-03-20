@@ -1,6 +1,6 @@
 // api/projects.js
-import { db } from "../utils/firebase";
-import { verifyToken } from "./auth";
+import { db } from "../utils/firebase.js";
+import { verifyToken } from "./auth.js";
 import crypto from 'crypto';
 
 const DEFAULT_IMAGE = 'https://picsum.photos/200/200';
