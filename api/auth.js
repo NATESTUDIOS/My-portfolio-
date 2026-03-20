@@ -1,5 +1,5 @@
 // api/auth.js
-import { db } from "../utils/firebase";
+import { db } from "../utils/firebase.js";
 import crypto from 'crypto';
 
 const DEFAULT_IMAGE = 'https://picsum.photos/200/200';
