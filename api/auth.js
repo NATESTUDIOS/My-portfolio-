@@ -57,15 +57,21 @@ const cleanUserTag = (tag) => {
   return tag.toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 
+// Updated sanitizeHTML function that preserves JavaScript functionality
 const sanitizeHTML = (html) => {
   if (!html) return null;
-  // Remove script tags and their contents
-  let sanitized = html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-  // Remove on* attributes
-  sanitized = sanitized.replace(/\s+on\w+="[^"]*"/gi, '');
+  
+  // Remove only dangerous inline event handlers
+  let sanitized = html.replace(/\s+on\w+="[^"]*"/gi, '');
   sanitized = sanitized.replace(/\s+on\w+='[^']*'/gi, '');
-  // Remove javascript: links
-  sanitized = sanitized.replace(/javascript:/gi, 'blocked:');
+  
+  // Remove javascript: links (replace with # to maintain link structure)
+  sanitized = sanitized.replace(/javascript:/gi, '#');
+  
+  // Allow script tags and their contents to remain
+  // Allow data-* attributes (they're safe)
+  // Allow all other HTML content
+  
   return sanitized;
 };
 
@@ -372,7 +378,14 @@ async function handleGetPortfolio(req, res, userTag) {
         res.setHeader('Content-Type', 'text/html');
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('X-Frame-Options', 'DENY');
-        res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'none';");
+        
+        // Updated CSP that allows scripts, styles, and images
+        // This enables JavaScript functionality while maintaining basic security
+        res.setHeader(
+          'Content-Security-Policy', 
+          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
+        );
+        
         return res.send(portfolio.content);
       }
       return res.status(404).json({ error: 'Portfolio content not found' });
