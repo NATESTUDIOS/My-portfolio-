@@ -57,6 +57,32 @@ const cleanUserTag = (tag) => {
   return tag.toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 
+// New function to clean email for Firebase path
+const cleanEmail = (email) => {
+  if (!email) return '';
+  // Replace Firebase invalid characters: . # $ [ ] /
+  // Common approach: replace dots with commas or other safe character
+  return email
+    .replace(/\./g, ',')  // Replace dots with commas
+    .replace(/#/g, '_hash_')
+    .replace(/\$/g, '_dollar_')
+    .replace(/\[/g, '_lb_')
+    .replace(/\]/g, '_rb_')
+    .replace(/\//g, '_slash_');
+};
+
+// Helper function to reverse the email cleaning (if needed)
+const unescapeEmail = (cleanedEmail) => {
+  if (!cleanedEmail) return '';
+  return cleanedEmail
+    .replace(/,/g, '.')
+    .replace(/_hash_/g, '#')
+    .replace(/_dollar_/g, '$')
+    .replace(/_lb_/g, '[')
+    .replace(/_rb_/g, ']')
+    .replace(/_slash_/g, '/');
+};
+
 // Updated sanitizeHTML function that preserves JavaScript functionality
 const sanitizeHTML = (html) => {
   if (!html) return null;
@@ -75,6 +101,28 @@ const sanitizeHTML = (html) => {
   return sanitized;
 };
 
+// Helper function to parse request body
+const parseBody = async (req) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        if (body) {
+          resolve(JSON.parse(body));
+        } else {
+          resolve({});
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on('error', reject);
+  });
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -82,6 +130,18 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Parse body for POST, PUT, DELETE requests
+  let body = {};
+  if (req.method !== 'GET' && req.method !== 'OPTIONS') {
+    try {
+      body = await parseBody(req);
+      req.body = body;
+    } catch (error) {
+      console.error('Error parsing body:', error);
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
   }
 
   const { action, user_tag } = req.query;
@@ -120,6 +180,7 @@ async function handleCreate(req, res) {
   }
 
   const cleanTag = cleanUserTag(user_tag);
+  const cleanEmailKey = cleanEmail(email);
 
   // Check if user_tag exists
   const userRef = db.ref(`ExAuths/users/${cleanTag}`);
@@ -128,8 +189,8 @@ async function handleCreate(req, res) {
     return res.status(400).json({ error: 'User tag already exists' });
   }
 
-  // Check if email exists
-  const emailRef = db.ref(`ExAuths/email_index/${email.replace(/\./g, ',')}`);
+  // Check if email exists using cleaned email key
+  const emailRef = db.ref(`ExAuths/email_index/${cleanEmailKey}`);
   const emailSnapshot = await emailRef.once('value');
   if (emailSnapshot.exists()) {
     return res.status(400).json({ error: 'Email already registered' });
@@ -148,7 +209,7 @@ async function handleCreate(req, res) {
 
   const user = {
     userId,
-    email,
+    email, // Store original email in user object
     password: hashedPassword,
     user_tag: cleanTag,
     icon: icon || DEFAULT_IMAGE,
@@ -162,8 +223,8 @@ async function handleCreate(req, res) {
   // Store user by tag
   await userRef.set(user);
 
-  // Store email index
-  await db.ref(`ExAuths/email_index/${email.replace(/\./g, ',')}`).set(cleanTag);
+  // Store email index using cleaned email key
+  await db.ref(`ExAuths/email_index/${cleanEmailKey}`).set(cleanTag);
 
   // Store mappings
   await db.ref(`ExAuths/userids/${userId}`).set(cleanTag);
@@ -188,8 +249,11 @@ async function handleLogin(req, res) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  // Get user_tag from email index (O(1) lookup)
-  const emailRef = db.ref(`ExAuths/email_index/${email.replace(/\./g, ',')}`);
+  // Clean email for Firebase path lookup
+  const cleanEmailKey = cleanEmail(email);
+  
+  // Get user_tag from email index using cleaned email key (O(1) lookup)
+  const emailRef = db.ref(`ExAuths/email_index/${cleanEmailKey}`);
   const emailSnapshot = await emailRef.once('value');
   const userTag = emailSnapshot.val();
 
@@ -282,9 +346,12 @@ async function handleDelete(req, res) {
     return res.status(404).json({ error: 'User not found' });
   }
 
+  // Clean email for index removal
+  const cleanEmailKey = cleanEmail(user.email);
+
   // Delete all user data
   await userRef.remove();
-  await db.ref(`ExAuths/email_index/${user.email.replace(/\./g, ',')}`).remove();
+  await db.ref(`ExAuths/email_index/${cleanEmailKey}`).remove();
   await db.ref(`ExAuths/userids/${user.userId}`).remove();
   await db.ref(`ExAuths/usertags/${cleanTag}`).remove();
 
