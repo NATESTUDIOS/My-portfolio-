@@ -26,10 +26,10 @@
       "methods": ["GET"]
     },
     {
-      "src": "^/([^/]+)$",
+    "src": "^/portfolio/([^/]+)$",
       "dest": "/api/auth.js?user_tag=$1",
       "methods": ["GET"],
-      "continue": true
+       "continue": true
     },
     {
       "src": "^/([^/.]+)\\.html$",
