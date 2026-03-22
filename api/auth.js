@@ -86,18 +86,18 @@ const unescapeEmail = (cleanedEmail) => {
 // Updated sanitizeHTML function that preserves JavaScript functionality
 const sanitizeHTML = (html) => {
   if (!html) return null;
-  
+
   // Remove only dangerous inline event handlers
   let sanitized = html.replace(/\s+on\w+="[^"]*"/gi, '');
   sanitized = sanitized.replace(/\s+on\w+='[^']*'/gi, '');
-  
+
   // Remove javascript: links (replace with # to maintain link structure)
   sanitized = sanitized.replace(/javascript:/gi, '#');
-  
+
   // Allow script tags and their contents to remain
   // Allow data-* attributes (they're safe)
   // Allow all other HTML content
-  
+
   return sanitized;
 };
 
@@ -124,6 +124,7 @@ const parseBody = async (req) => {
 };
 
 export default async function handler(req, res) {
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -163,6 +164,8 @@ export default async function handler(req, res) {
         return await handleDelete(req, res);
       case 'portfolio':
         return await handlePortfolioActions(req, res);
+      case 'profile':  // NEW: Public profile endpoint for portfolio page
+        return await handleGetPublicProfile(req, res);
       default:
         return res.status(400).json({ error: 'Invalid action' });
     }
@@ -251,7 +254,7 @@ async function handleLogin(req, res) {
 
   // Clean email for Firebase path lookup
   const cleanEmailKey = cleanEmail(email);
-  
+
   // Get user_tag from email index using cleaned email key (O(1) lookup)
   const emailRef = db.ref(`ExAuths/email_index/${cleanEmailKey}`);
   const emailSnapshot = await emailRef.once('value');
@@ -427,7 +430,7 @@ async function handlePortfolioActions(req, res) {
 
 async function handleGetPortfolio(req, res, userTag) {
   const cleanTag = cleanUserTag(userTag);
-  
+
   const userRef = db.ref(`ExAuths/users/${cleanTag}`);
   const userSnapshot = await userRef.once('value');
   const user = userSnapshot.val();
@@ -445,14 +448,13 @@ async function handleGetPortfolio(req, res, userTag) {
         res.setHeader('Content-Type', 'text/html');
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('X-Frame-Options', 'DENY');
-        
+
         // Updated CSP that allows scripts, styles, and images
-        // This enables JavaScript functionality while maintaining basic security
         res.setHeader(
           'Content-Security-Policy', 
           "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
         );
-        
+
         return res.send(portfolio.content);
       }
       return res.status(404).json({ error: 'Portfolio content not found' });
@@ -474,4 +476,43 @@ async function handleGetPortfolio(req, res, userTag) {
         message: 'This user has not set up a portfolio yet'
       });
   }
+}
+
+// NEW: Public profile endpoint for portfolio page
+async function handleGetPublicProfile(req, res) {
+  const { user_tag } = req.query;
+  
+  if (!user_tag) {
+    return res.status(400).json({ error: 'User tag required' });
+  }
+
+  const cleanTag = cleanUserTag(user_tag);
+  const userRef = db.ref(`ExAuths/users/${cleanTag}`);
+  const userSnapshot = await userRef.once('value');
+  const user = userSnapshot.val();
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Return complete public profile data for portfolio page
+  return res.json({
+    // Basic info
+    user_tag: user.user_tag,
+    userId: user.userId,
+    icon: user.icon,
+    description: user.description,
+    portfolio_url: user.portfolio_url,
+    created_at: user.created_at,
+    
+    // Portfolio configuration
+    portfolio: {
+      type: user.portfolio?.type || 'none',
+      content: null, // Don't expose content for security (handled by separate endpoint)
+      redirect_url: user.portfolio?.type === 'redirect' ? user.portfolio?.redirect_url : null
+    },
+    
+    // Metadata
+    message: user.portfolio?.type === 'none' ? 'This user has a minimal profile' : 'Portfolio configured'
+  });
 }
