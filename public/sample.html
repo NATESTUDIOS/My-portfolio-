@@ -7,86 +7,161 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+
     :root {
       --primary: #6366f1;
+      --primary-dark: #4f46e5;
       --secondary: #a855f7;
+      --accent: #06b6d4;
+      --bg-dark: #0a0c10;
+      --card-bg: rgba(15, 23, 42, 0.6);
     }
 
-    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    * { 
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
-      background-color: #0f172a;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+      background: linear-gradient(135deg, #0a0c10 0%, #0f172a 50%, #1e1b4b 100%);
       min-height: 100vh;
-      color: #f8fafc;
+      color: #e2e8f0;
+      position: relative;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
       border-radius: 1.5rem;
     }
 
     .glass-card-light {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
     }
 
     .project-card {
       transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      backdrop-filter: blur(8px);
     }
 
     .project-card:hover {
-      transform: translateY(-10px) scale(1.02);
+      transform: translateY(-8px);
       border-color: rgba(99, 102, 241, 0.4);
-      background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      background: rgba(15, 23, 42, 0.7);
+      box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.5);
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     .btn-primary:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -10px rgba(99, 102, 241, 0.5);
     }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.6);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .animate-up {
-      animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+
+    .animate-in {
+      animation: fadeIn 0.6s ease-out forwards;
     }
 
     /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; }
 
+    /* Filter button active state */
+    .filter-btn {
+      transition: all 0.2s ease;
+    }
+    
     .filter-btn.active {
-      background: white;
-      color: #0f172a;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Project image container */
+    .project-image {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .glass-card {
+        border-radius: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="app" class="min-h-screen">
-    <!-- Sophisticated Loading State -->
+  <div id="app" class="relative z-10 min-h-screen">
+    <!-- Elegant Loading State -->
     <div class="flex items-center justify-center min-h-screen">
-      <div class="relative">
-        <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-        <div class="mt-4 text-indigo-300 font-medium tracking-wide animate-pulse">Loading experience...</div>
+      <div class="text-center">
+        <div class="relative w-20 h-20 mx-auto mb-6">
+          <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+          <div class="absolute inset-0 border-4 border-t-indigo-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-indigo-400/80 font-medium tracking-wide animate-pulse">Loading portfolio...</p>
       </div>
     </div>
   </div>
@@ -101,7 +176,7 @@
 
     async function fetchUserData(userSlug) {
       const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
-      if (!response.ok) throw new Error(response.status === 404 ? 'User not found' : 'Fetch error');
+      if (!response.ok) throw new Error(response.status === 404 ? 'User not found' : 'Failed to load profile');
       return await response.json();
     }
 
@@ -110,17 +185,23 @@
         const response = await fetch(`${API_BASE}/projects?action=public&user_tag=${userSlug}`);
         const data = await response.json();
         return data.projects || [];
-      } catch (e) { return []; }
+      } catch (e) { 
+        return []; 
+      }
     }
 
     function renderError(message) {
       document.getElementById('app').innerHTML = `
         <div class="flex items-center justify-center min-h-screen p-6">
           <div class="glass-card max-w-md w-full p-10 text-center animate-up">
-            <div class="text-6xl mb-6">orbit</div>
-            <h2 class="text-3xl font-bold mb-4">Space Unknown</h2>
+            <div class="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-6">
+              <i class="fas fa-compass text-4xl text-indigo-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-3">Portfolio Not Found</h2>
             <p class="text-slate-400 mb-8">${escapeHtml(message)}</p>
-            <a href="/" class="btn-primary block w-full py-4 rounded-2xl font-bold">Return to Base</a>
+            <a href="/" class="btn-primary inline-block w-full py-3 rounded-xl font-semibold text-center">
+              Return Home
+            </a>
           </div>
         </div>
       `;
@@ -129,129 +210,172 @@
     function renderPortfolioFromJSON(user, projects) {
       const app = document.getElementById('app');
       const totalProjects = projects.length;
-      const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently';
+      const hostedCount = projects.filter(p => p.type === 'hosted').length;
+      const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '2024';
 
       app.innerHTML = `
-        <div class="max-w-6xl mx-auto px-6 py-12">
+        <div class="max-w-7xl mx-auto px-6 py-8 md:py-12">
           
-          <!-- Hero Section -->
-          <header class="glass-card p-8 md:p-12 mb-12 animate-up relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <i class="fas fa-terminal text-9xl"></i>
-            </div>
-            
-            <div class="flex flex-col md:flex-row items-center gap-10">
-              <div class="relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                <img src="${user.icon || ''}" 
-                     class="relative w-32 h-32 md:w-44 md:h-44 rounded-full object-cover border-2 border-white/10 shadow-2xl"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=6366f1&color=fff&size=200&bold=true'">
+          <!-- Hero Section - Balanced Layout -->
+          <div class="glass-card p-6 md:p-10 mb-12 animate-up">
+            <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+              
+              <!-- Avatar Column -->
+              <div class="flex justify-center lg:justify-start">
+                <div class="relative group">
+                  <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <img src="${user.icon || ''}" 
+                       class="relative w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-2 border-indigo-500/30 shadow-2xl"
+                       onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=6366f1&color=fff&size=200&bold=true'">
+                </div>
               </div>
               
-              <div class="flex-1 text-center md:text-left">
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                  <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">${escapeHtml(user.user_tag)}</h1>
-                  <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-widest">Verified Creator</span>
+              <!-- Info Column -->
+              <div class="flex-1 text-center lg:text-left">
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
+                  <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">${escapeHtml(user.user_tag)}</h1>
+                  <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full text-xs font-semibold">
+                    <i class="fas fa-check-circle mr-1 text-xs"></i>Verified
+                  </span>
                 </div>
                 
-                <p class="text-slate-400 text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
-                  ${escapeHtml(user.description || 'Crafting digital solutions and exploring the boundaries of modern web development.')}
+                <p class="text-slate-400 text-base md:text-lg mb-6 max-w-2xl leading-relaxed">
+                  ${escapeHtml(user.description || 'Creative developer passionate about building exceptional digital experiences.')}
                 </p>
                 
-                <div class="grid grid-cols-2 md:flex flex-wrap gap-4">
-                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3">
-                    <i class="fas fa-calendar-alt text-indigo-400"></i>
-                    <span class="text-sm font-medium">Joined ${joinDate}</span>
+                <!-- Stats Grid - Balanced -->
+                <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-calendar-alt text-indigo-400 text-sm"></i>
+                    <span class="text-sm">Joined ${joinDate}</span>
                   </div>
-                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3">
-                    <i class="fas fa-layer-group text-purple-400"></i>
-                    <span class="text-sm font-medium">${totalProjects} Creations</span>
+                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-layer-group text-purple-400 text-sm"></i>
+                    <span class="text-sm">${totalProjects} Projects</span>
                   </div>
-                  <button onclick="copyUrl()" class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3 hover:bg-white/10 transition">
-                    <i class="fas fa-link text-emerald-400"></i>
-                    <span class="text-sm font-medium">Copy Profile</span>
+                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-code text-cyan-400 text-sm"></i>
+                    <span class="text-sm">${hostedCount} Hosted</span>
+                  </div>
+                  <button onclick="copyUrl()" class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/5 transition group">
+                    <i class="fas fa-link text-emerald-400 text-sm group-hover:text-emerald-300"></i>
+                    <span class="text-sm">Share Profile</span>
                   </button>
                 </div>
               </div>
             </div>
-          </header>
+          </div>
 
-          <!-- Projects Section -->
-          <section class="animate-up" style="animation-delay: 0.2s">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-              <h2 class="text-3xl font-bold flex items-center gap-3">
-                <span class="w-8 h-1 bg-indigo-500 rounded-full"></span>
-                Featured Work
-              </h2>
-              
-              <div class="flex gap-2 p-1 glass-card-light rounded-xl overflow-x-auto w-full md:w-auto">
-                <button onclick="filterProjects('all')" class="filter-btn active px-5 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap">All Work</button>
-                <button onclick="filterProjects('hosted')" class="filter-btn px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition whitespace-nowrap">Hosted</button>
-                <button onclick="filterProjects('link')" class="filter-btn px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition whitespace-nowrap">External</button>
+          <!-- Projects Section - Balanced Grid -->
+          <div class="animate-up" style="animation-delay: 0.15s">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
+              <div>
+                <h2 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                  <span class="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></span>
+                  Featured Work
+                </h2>
+                <p class="text-slate-500 text-sm mt-2">Explore projects and creations</p>
               </div>
+              
+              ${totalProjects > 0 ? `
+                <div class="flex gap-2 p-1 bg-slate-800/50 rounded-xl">
+                  <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">All</button>
+                  <button onclick="filterProjects('hosted')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Hosted</button>
+                  <button onclick="filterProjects('link')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Links</button>
+                  <button onclick="filterProjects('image')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Images</button>
+                </div>
+              ` : ''}
             </div>
             
-            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               ${totalProjects > 0 ? projects.map((project, index) => `
-                <div class="project-card glass-card flex flex-col h-full group" data-type="${project.type}">
-                  <div class="relative aspect-video overflow-hidden rounded-t-2xl">
-                    <img src="${project.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80'">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-60"></div>
-                    <div class="absolute bottom-4 left-4">
-                       <span class="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">
-                        ${project.type}
+                <div class="project-card rounded-2xl overflow-hidden group cursor-pointer flex flex-col h-full" 
+                     data-type="${project.type}" 
+                     onclick="viewProject('${project.user_id}', '${project.slug}')"
+                     style="animation: fadeIn 0.5s ease-out ${index * 0.05}s forwards">
+                  
+                  <!-- Image Container -->
+                  <div class="project-image relative h-48">
+                    <img src="${project.image}" 
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                         onerror="this.src='https://picsum.photos/400/240?random=${index}'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                    
+                    <!-- Type Badge -->
+                    <div class="absolute top-3 left-3">
+                      <span class="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-lg text-xs font-medium border border-white/10">
+                        ${project.type === 'hosted' ? '<i class="fas fa-code mr-1 text-xs"></i> Hosted' : 
+                          project.type === 'link' ? '<i class="fas fa-link mr-1 text-xs"></i> Link' : 
+                          '<i class="fas fa-image mr-1 text-xs"></i> Image'}
                       </span>
                     </div>
                   </div>
                   
-                  <div class="p-6 flex flex-col flex-1">
-                    <h3 class="text-xl font-bold mb-3 group-hover:text-indigo-400 transition">${escapeHtml(project.name)}</h3>
-                    <p class="text-slate-400 text-sm line-clamp-3 mb-6 leading-relaxed flex-1">
-                      ${escapeHtml(project.description || 'No detailed description provided for this project.')}
-                    </p>
+                  <!-- Content -->
+                  <div class="p-5 flex flex-col flex-1">
+                    <h3 class="font-bold text-lg mb-2 line-clamp-1 group-hover:text-indigo-400 transition">${escapeHtml(project.name)}</h3>
+                    <p class="text-slate-400 text-sm line-clamp-2 mb-4 flex-1">${escapeHtml(project.description || 'No description available.')}</p>
                     
-                    <button onclick="viewProject('${project.user_id}', '${project.slug}')" 
-                       class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-bold text-sm hover:bg-white hover:text-slate-900 transition-all duration-300 flex items-center justify-center gap-2">
-                      Explore Project <i class="fas fa-arrow-right text-xs"></i>
-                    </button>
+                    <div class="flex items-center justify-between pt-3 border-t border-white/5">
+                      <span class="text-xs text-slate-500">
+                        <i class="far fa-calendar-alt mr-1"></i>
+                        ${new Date(project.created_at).toLocaleDateString()}
+                      </span>
+                      <span class="text-indigo-400 text-sm font-medium group-hover:translate-x-1 transition inline-flex items-center gap-1">
+                        Explore <i class="fas fa-arrow-right text-xs"></i>
+                      </span>
+                    </div>
                   </div>
                 </div>
               `).join('') : `
-                <div class="col-span-full py-20 text-center glass-card">
-                  <i class="fas fa-rocket-launch text-5xl text-slate-700 mb-4"></i>
-                  <h3 class="text-xl font-bold">The lab is quiet...</h3>
-                  <p class="text-slate-500">No public projects available at the moment.</p>
+                <div class="col-span-full py-16 text-center">
+                  <div class="glass-card-light p-12 max-w-md mx-auto">
+                    <i class="fas fa-palette text-5xl text-slate-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">No Projects Yet</h3>
+                    <p class="text-slate-500 text-sm">This creator hasn't shared any public projects yet.</p>
+                  </div>
                 </div>
               `}
             </div>
-          </section>
+          </div>
 
-          <!-- Footer -->
-          <footer class="mt-24 pt-12 border-t border-white/5 text-center text-slate-500 animate-up" style="animation-delay: 0.4s">
-            <p class="mb-4">Designed with excellence via <span class="text-white font-bold">Exploits</span></p>
-            <div class="flex justify-center gap-6 text-sm">
-              <a href="/" class="hover:text-indigo-400 transition">Network</a>
-              <a href="/login" class="hover:text-indigo-400 transition">Create</a>
-              <a href="/docs" class="hover:text-indigo-400 transition">Docs</a>
+          <!-- Footer - Minimal & Balanced -->
+          <footer class="mt-20 pt-8 border-t border-white/5 text-center">
+            <div class="flex flex-wrap justify-center gap-6 text-sm text-slate-500 mb-4">
+              <a href="/" class="hover:text-indigo-400 transition">Home</a>
+              <a href="/login" class="hover:text-indigo-400 transition">Get Started</a>
+              <a href="/docs" class="hover:text-indigo-400 transition">Documentation</a>
+              <a href="#" class="hover:text-indigo-400 transition">Privacy</a>
             </div>
+            <p class="text-xs text-slate-600">
+              <i class="fas fa-bolt mr-1 text-indigo-500"></i> Powered by Exploits — Portfolio platform for creators
+            </p>
           </footer>
         </div>
       `;
     }
 
-    // Helper functions
+    // Helper Functions
     window.filterProjects = function(type) {
+      // Update active button state
       document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-white', 'text-slate-900');
+        btn.classList.remove('active');
         btn.classList.add('text-slate-400');
-        if (btn.textContent.toLowerCase().includes(type) || (type === 'all' && btn.textContent.includes('All'))) {
-          btn.classList.add('active', 'bg-white', 'text-slate-900');
+        if ((type === 'all' && btn.textContent.trim() === 'All') || 
+            (type !== 'all' && btn.textContent.trim().toLowerCase() === type)) {
+          btn.classList.add('active');
           btn.classList.remove('text-slate-400');
         }
       });
-      
+
+      // Filter projects
       document.querySelectorAll('.project-card').forEach(card => {
-        card.style.display = (type === 'all' || card.dataset.type === type) ? 'flex' : 'none';
+        if (type === 'all' || card.dataset.type === type) {
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else {
+          card.style.display = 'none';
+        }
       });
     };
 
@@ -260,11 +384,15 @@
     };
 
     window.copyUrl = function() {
-      navigator.clipboard.writeText(window.location.href);
-      const btn = event.currentTarget;
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check text-emerald-400"></i><span class="text-sm font-medium">Copied!</span>';
-      setTimeout(() => btn.innerHTML = original, 2000);
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = event.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check text-emerald-400 text-sm"></i><span class="text-sm">Copied!</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+        }, 2000);
+      });
     };
 
     function escapeHtml(text) {
@@ -276,18 +404,24 @@
 
     async function init() {
       const userSlug = getUserSlug();
-      if (!userSlug) return renderError('No astronaut found. Please check the URL.');
-      
+      if (!userSlug) {
+        renderError('No user specified. Please provide a valid username.');
+        return;
+      }
+
       try {
         const user = await fetchUserData(userSlug);
         const projects = await fetchUserProjects(userSlug);
         renderPortfolioFromJSON(user, projects);
-        document.title = `${user.user_tag} | Profile`;
+        document.title = `${user.user_tag} | Portfolio - Exploits`;
       } catch (error) {
-        renderError(error.message);
+        console.error('Error:', error);
+        renderError(error.message === 'User not found' 
+          ? `User "${userSlug}" doesn't exist.` 
+          : 'Unable to load portfolio. Please try again later.');
       }
     }
-    
+
     init();
   </script>
 </body>
