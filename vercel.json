@@ -31,21 +31,21 @@
     "methods": ["GET"]
     },
     {
-      "src": "^/([^/.]+)\\.html$",
-      "dest": "/public/$1.html"
-    },
-    {
       "src": "^/$",
-      "dest": "/public/index.html"
+      "dest": "/Public/index.html"
     },
     {
-      "src": "^/(.*)\\.(css|js|jpg|png|gif|svg|ico|json)$",
-      "dest": "/public/$1.$2"
+      "src": "^/([^/]+)/$",
+      "dest": "/Public/$1/index.html"
+    },
+    {
+      "src": "^/([^/]+)$",
+      "dest": "/Public/$1.html"
     },
     {
       "src": "^/(.*)$",
-      "dest": "/public/$1"
-    }
+      "dest": "/Public/$1"
+}
   ],
   "headers": [
     {
