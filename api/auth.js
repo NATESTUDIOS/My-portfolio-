@@ -1,77 +1,136 @@
-// api/auth.js
+//api/auth.js
+/**
+ * Authentication & Portfolio API
+ * 
+ * This API handles user authentication, profile management, and portfolio hosting.
+ * Features:
+ * - User registration with email/password
+ * - JWT-based authentication (14-day tokens)
+ * - Portfolio hosting (HTML content, redirects, or minimal profiles)
+ * - Profile management (icon, description)
+ * - Public profile endpoints for portfolio pages
+ * 
+ * Database Structure (Firebase Realtime Database):
+ * - ExAuths/users/{user_tag} - User profile data
+ * - ExAuths/email_index/{cleaned_email} - Maps email to user_tag for fast login
+ * - ExAuths/userids/{userId} - Maps user ID to user_tag
+ * - ExAuths/usertags/{user_tag} - Maps user_tag to user ID
+ */
+
 import { db } from "../utils/firebase.js";
 import crypto from 'crypto';
 
-const DEFAULT_IMAGE = 'https://picsum.photos/200/200';
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const BASE_URL = process.env.BASE_URL;
+// ===== Configuration Constants =====
+const DEFAULT_IMAGE = 'https://picsum.photos/200/200';  // Default profile picture
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;        // Admin key for user deletion
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'; // JWT signing key
+const BASE_URL = process.env.BASE_URL;                  // Base URL for generating portfolio links
 
-// Helper functions
+// ===== Helper Functions =====
+
+/**
+ * Generates a unique user ID
+ * Format: exuser_{timestamp}_{random_hex}
+ */
 const generateUserId = () => {
   return `exuser_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
 };
 
+/**
+ * Hashes a password with a random salt
+ * @returns {string} Format: "salt:hash"
+ */
 const hashPassword = (password) => {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.createHash('sha256').update(password + salt).digest('hex');
   return `${salt}:${hash}`;
 };
 
+/**
+ * Verifies a password against its stored hash
+ * @param {string} password - Plain text password to verify
+ * @param {string} stored - Stored hash in "salt:hash" format
+ * @returns {boolean} True if password matches
+ */
 const verifyPassword = (password, stored) => {
   const [salt, hash] = stored.split(':');
   const newHash = crypto.createHash('sha256').update(password + salt).digest('hex');
   return newHash === hash;
 };
 
+/**
+ * Generates a JWT token for authentication
+ * Token payload includes userId, userTag, and expiration (14 days)
+ * Format: base64Payload.signature
+ */
 const generateToken = (userId, userTag) => {
   const payload = {
     userId,
     userTag,
-    iss: 'exploits',
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (14 * 24 * 60 * 60)
+    iss: 'exploits',           // Issuer identifier
+    iat: Math.floor(Date.now() / 1000), // Issued at timestamp
+    exp: Math.floor(Date.now() / 1000) + (14 * 24 * 60 * 60) // Expires in 14 days
   };
   const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
   const signature = crypto.createHmac('sha256', JWT_SECRET).update(base64Payload).digest('base64');
   return `${base64Payload}.${signature}`;
 };
 
+/**
+ * Verifies and decodes a JWT token
+ * @param {string} token - JWT token to verify
+ * @returns {object|null} Decoded payload if valid, null otherwise
+ * 
+ * This function is exported for use in other API endpoints (like projects.js)
+ */
 export const verifyToken = (token) => {
   try {
     const [base64Payload, signature] = token.split('.');
     const expectedSignature = crypto.createHmac('sha256', JWT_SECRET).update(base64Payload).digest('base64');
 
+    // Check signature validity
     if (signature !== expectedSignature) return null;
 
+    // Decode and parse payload
     const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
+    
+    // Check expiration
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
 
     return payload;
   } catch {
-    return null;
+    return null; // Return null for any parsing errors
   }
 };
 
+/**
+ * Cleans a user tag for use as a Firebase key
+ * - Converts to lowercase
+ * - Removes all non-alphanumeric characters
+ */
 const cleanUserTag = (tag) => {
   return tag.toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 
-// New function to clean email for Firebase path
+/**
+ * Cleans an email for use as a Firebase key
+ * Firebase doesn't allow characters: . # $ [ ] /
+ * This replaces them with safe alternatives
+ */
 const cleanEmail = (email) => {
   if (!email) return '';
-  // Replace Firebase invalid characters: . # $ [ ] /
-  // Common approach: replace dots with commas or other safe character
   return email
-    .replace(/\./g, ',')  // Replace dots with commas
-    .replace(/#/g, '_hash_')
-    .replace(/\$/g, '_dollar_')
-    .replace(/\[/g, '_lb_')
-    .replace(/\]/g, '_rb_')
-    .replace(/\//g, '_slash_');
+    .replace(/\./g, ',')        // Replace dots with commas
+    .replace(/#/g, '_hash_')    // Replace # with _hash_
+    .replace(/\$/g, '_dollar_') // Replace $ with _dollar_
+    .replace(/\[/g, '_lb_')     // Replace [ with _lb_
+    .replace(/\]/g, '_rb_')     // Replace ] with _rb_
+    .replace(/\//g, '_slash_'); // Replace / with _slash_
 };
 
-// Helper function to reverse the email cleaning (if needed)
+/**
+ * Reverses the email cleaning (utility function, not used directly in API)
+ */
 const unescapeEmail = (cleanedEmail) => {
   if (!cleanedEmail) return '';
   return cleanedEmail
@@ -83,25 +142,32 @@ const unescapeEmail = (cleanedEmail) => {
     .replace(/_slash_/g, '/');
 };
 
-// Updated sanitizeHTML function that preserves JavaScript functionality
+/**
+ * Sanitizes HTML content for hosted portfolios
+ * - Removes inline event handlers (onclick, onload, etc.)
+ - Replaces javascript: links with #
+ * - Allows script tags and data-* attributes
+ */
 const sanitizeHTML = (html) => {
   if (!html) return null;
 
-  // Remove only dangerous inline event handlers
+  // Remove dangerous inline event handlers
   let sanitized = html.replace(/\s+on\w+="[^"]*"/gi, '');
   sanitized = sanitized.replace(/\s+on\w+='[^']*'/gi, '');
 
-  // Remove javascript: links (replace with # to maintain link structure)
+  // Remove javascript: links
   sanitized = sanitized.replace(/javascript:/gi, '#');
 
-  // Allow script tags and their contents to remain
+  // Allow script tags and their contents
   // Allow data-* attributes (they're safe)
   // Allow all other HTML content
 
   return sanitized;
 };
 
-// Helper function to parse request body
+/**
+ * Parses JSON request body from incoming request
+ */
 const parseBody = async (req) => {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -123,17 +189,32 @@ const parseBody = async (req) => {
   });
 };
 
+// ===== Main API Handler =====
+
+/**
+ * Main API handler for authentication endpoints
+ * 
+ * Endpoints:
+ * - GET /api/auth?user_tag={tag} - Public portfolio page
+ * - POST /api/auth?action=create - Create new user
+ * - POST /api/auth?action=login - Login user
+ * - PUT /api/auth?action=edit - Edit user profile (requires auth)
+ * - DELETE /api/auth?action=delete - Delete user (requires admin key)
+ * - POST /api/auth?action=portfolio - Manage portfolio (requires auth)
+ * - GET /api/auth?action=profile&user_tag={tag} - Get public profile
+ */
 export default async function handler(req, res) {
-  // Set CORS headers
+  // Set CORS headers for cross-origin requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Parse body for POST, PUT, DELETE requests
+  // Parse request body for non-GET requests
   let body = {};
   if (req.method !== 'GET' && req.method !== 'OPTIONS') {
     try {
@@ -148,11 +229,13 @@ export default async function handler(req, res) {
   const { action, user_tag } = req.query;
 
   try {
-    // Public portfolio endpoint - BASE_URL/:user_tag
+    // Public portfolio endpoint - serves HTML or redirects
+    // URL pattern: GET /api/auth/{user_tag}
     if (req.method === 'GET' && user_tag && !action) {
       return await handleGetPortfolio(req, res, user_tag);
     }
 
+    // Route to appropriate handler based on action parameter
     switch (action) {
       case 'create':
         return await handleCreate(req, res);
@@ -164,7 +247,7 @@ export default async function handler(req, res) {
         return await handleDelete(req, res);
       case 'portfolio':
         return await handlePortfolioActions(req, res);
-      case 'profile':  // NEW: Public profile endpoint for portfolio page
+      case 'profile':
         return await handleGetPublicProfile(req, res);
       default:
         return res.status(400).json({ error: 'Invalid action' });
@@ -175,9 +258,29 @@ export default async function handler(req, res) {
   }
 }
 
+// ===== Request Handlers =====
+
+/**
+ * CREATE - User Registration
+ * POST /api/auth?action=create
+ * 
+ * Body: {
+ *   email: string,
+ *   password: string,
+ *   user_tag: string,
+ *   icon?: string (URL),
+ *   description?: string,
+ *   portfolio_type?: 'none' | 'hosted' | 'redirect',
+ *   portfolio_content?: string (HTML for hosted type),
+ *   portfolio_redirect?: string (URL for redirect type)
+ * }
+ * 
+ * Response: { message, userId, user_tag, portfolio_url, token, expires_in }
+ */
 async function handleCreate(req, res) {
   const { email, password, user_tag, icon, description, portfolio_type, portfolio_content, portfolio_redirect } = req.body;
 
+  // Validate required fields
   if (!email || !password || !user_tag) {
     return res.status(400).json({ error: 'Email, password, and user_tag are required' });
   }
@@ -185,34 +288,36 @@ async function handleCreate(req, res) {
   const cleanTag = cleanUserTag(user_tag);
   const cleanEmailKey = cleanEmail(email);
 
-  // Check if user_tag exists
+  // Check if user_tag is already taken
   const userRef = db.ref(`ExAuths/users/${cleanTag}`);
   const snapshot = await userRef.once('value');
   if (snapshot.exists()) {
     return res.status(400).json({ error: 'User tag already exists' });
   }
 
-  // Check if email exists using cleaned email key
+  // Check if email is already registered
   const emailRef = db.ref(`ExAuths/email_index/${cleanEmailKey}`);
   const emailSnapshot = await emailRef.once('value');
   if (emailSnapshot.exists()) {
     return res.status(400).json({ error: 'Email already registered' });
   }
 
+  // Generate user ID and hash password
   const userId = generateUserId();
   const hashedPassword = hashPassword(password);
 
-  // Portfolio setup
+  // Setup portfolio configuration
   const portfolio = {
-    type: portfolio_type || 'none', // 'none', 'hosted', 'redirect'
+    type: portfolio_type || 'none',
     content: portfolio_type === 'hosted' ? sanitizeHTML(portfolio_content) : null,
     redirect_url: portfolio_type === 'redirect' ? portfolio_redirect : null,
     last_updated: new Date().toISOString()
   };
 
+  // Create user object
   const user = {
     userId,
-    email, // Store original email in user object
+    email,
     password: hashedPassword,
     user_tag: cleanTag,
     icon: icon || DEFAULT_IMAGE,
@@ -223,16 +328,13 @@ async function handleCreate(req, res) {
     updated_at: new Date().toISOString()
   };
 
-  // Store user by tag
+  // Store user data in Firebase
   await userRef.set(user);
-
-  // Store email index using cleaned email key
   await db.ref(`ExAuths/email_index/${cleanEmailKey}`).set(cleanTag);
-
-  // Store mappings
   await db.ref(`ExAuths/userids/${userId}`).set(cleanTag);
   await db.ref(`ExAuths/usertags/${cleanTag}`).set(userId);
 
+  // Generate authentication token
   const token = generateToken(userId, cleanTag);
 
   return res.status(201).json({
@@ -245,6 +347,13 @@ async function handleCreate(req, res) {
   });
 }
 
+/**
+ * LOGIN - User Authentication
+ * POST /api/auth?action=login
+ * 
+ * Body: { email: string, password: string }
+ * Response: { message, userId, user_tag, portfolio_url, token, expires_in }
+ */
 async function handleLogin(req, res) {
   const { email, password } = req.body;
 
@@ -252,10 +361,9 @@ async function handleLogin(req, res) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  // Clean email for Firebase path lookup
   const cleanEmailKey = cleanEmail(email);
 
-  // Get user_tag from email index using cleaned email key (O(1) lookup)
+  // Find user by email (O(1) lookup using email index)
   const emailRef = db.ref(`ExAuths/email_index/${cleanEmailKey}`);
   const emailSnapshot = await emailRef.once('value');
   const userTag = emailSnapshot.val();
@@ -278,6 +386,7 @@ async function handleLogin(req, res) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
+  // Generate new token
   const token = generateToken(user.userId, userTag);
 
   return res.json({
@@ -290,7 +399,16 @@ async function handleLogin(req, res) {
   });
 }
 
+/**
+ * EDIT - Update User Profile
+ * PUT /api/auth?action=edit
+ * 
+ * Headers: { Authorization: "Bearer {token}" }
+ * Body: { field: 'icon' | 'description', value: string }
+ * Response: { message, updated_field }
+ */
 async function handleEdit(req, res) {
+  // Verify authentication
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: 'No token provided' });
@@ -309,12 +427,13 @@ async function handleEdit(req, res) {
     return res.status(400).json({ error: 'Field and value are required' });
   }
 
+  // Only allow editing certain fields
   const allowedFields = ['icon', 'description'];
   if (!allowedFields.includes(field)) {
     return res.status(400).json({ error: 'Invalid field' });
   }
 
-  // Get current user
+  // Update user in database
   const userRef = db.ref(`ExAuths/users/${payload.userTag}`);
   await userRef.update({ 
     [field]: value, 
@@ -327,9 +446,18 @@ async function handleEdit(req, res) {
   });
 }
 
+/**
+ * DELETE - Remove User Account (Admin Only)
+ * DELETE /api/auth?action=delete
+ * 
+ * Headers: { x-admin-key: string }
+ * Body: { user_tag: string }
+ * Response: { message }
+ */
 async function handleDelete(req, res) {
   const adminKey = req.headers['x-admin-key'];
 
+  // Verify admin access
   if (!adminKey || adminKey !== ADMIN_API_KEY) {
     return res.status(403).json({ error: 'Admin access required' });
   }
@@ -349,10 +477,9 @@ async function handleDelete(req, res) {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  // Clean email for index removal
   const cleanEmailKey = cleanEmail(user.email);
 
-  // Delete all user data
+  // Delete all user data from all indices
   await userRef.remove();
   await db.ref(`ExAuths/email_index/${cleanEmailKey}`).remove();
   await db.ref(`ExAuths/userids/${user.userId}`).remove();
@@ -361,7 +488,21 @@ async function handleDelete(req, res) {
   return res.json({ message: 'User deleted successfully' });
 }
 
+/**
+ * PORTFOLIO - Manage Portfolio Configuration
+ * POST /api/auth?action=portfolio
+ * 
+ * Headers: { Authorization: "Bearer {token}" }
+ * Body: {
+ *   subaction: 'update' | 'get' | 'disable',
+ *   portfolio_type?: 'none' | 'hosted' | 'redirect',
+ *   portfolio_content?: string (for hosted type),
+ *   portfolio_redirect?: string (for redirect type)
+ * }
+ * Response: Portfolio data or confirmation message
+ */
 async function handlePortfolioActions(req, res) {
+  // Verify authentication
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: 'No token provided' });
@@ -386,6 +527,7 @@ async function handlePortfolioActions(req, res) {
 
   switch (subaction) {
     case 'update':
+      // Update portfolio configuration
       const portfolio = {
         type: portfolio_type || user.portfolio?.type || 'none',
         content: portfolio_type === 'hosted' ? sanitizeHTML(portfolio_content) : null,
@@ -405,12 +547,14 @@ async function handlePortfolioActions(req, res) {
       });
 
     case 'get':
+      // Get current portfolio configuration
       return res.json({
         portfolio: user.portfolio || { type: 'none' },
         portfolio_url: user.portfolio_url
       });
 
     case 'disable':
+      // Disable portfolio (set to none type)
       await userRef.update({
         'portfolio.type': 'none',
         'portfolio.content': null,
@@ -428,6 +572,15 @@ async function handlePortfolioActions(req, res) {
   }
 }
 
+/**
+ * GET PORTFOLIO - Public Portfolio Page
+ * GET /api/auth/{user_tag}
+ * 
+ * Serves different content based on portfolio type:
+ * - hosted: Returns HTML content with security headers
+ * - redirect: 302 redirect to external URL
+ * - none: Returns basic user profile as JSON
+ */
 async function handleGetPortfolio(req, res, userTag) {
   const cleanTag = cleanUserTag(userTag);
 
@@ -443,13 +596,14 @@ async function handleGetPortfolio(req, res, userTag) {
 
   switch (portfolio.type) {
     case 'hosted':
+      // Serve HTML content for hosted portfolios
       if (portfolio.content) {
-        // Set security headers for hosted HTML
+        // Set security headers for hosted content
         res.setHeader('Content-Type', 'text/html');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-Frame-Options', 'DENY');
-
-        // Updated CSP that allows scripts, styles, and images
+        res.setHeader('X-Content-Type-Options', 'nosniff');    // Prevent MIME sniffing
+        res.setHeader('X-Frame-Options', 'DENY');              // Prevent clickjacking
+        
+        // Content Security Policy - Allows scripts, styles, and external resources
         res.setHeader(
           'Content-Security-Policy', 
           "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
@@ -460,6 +614,7 @@ async function handleGetPortfolio(req, res, userTag) {
       return res.status(404).json({ error: 'Portfolio content not found' });
 
     case 'redirect':
+      // Redirect to external URL
       if (portfolio.redirect_url) {
         return res.redirect(302, portfolio.redirect_url);
       }
@@ -467,7 +622,7 @@ async function handleGetPortfolio(req, res, userTag) {
 
     case 'none':
     default:
-      // Return basic user profile as JSON
+      // Return minimal profile for users without portfolio
       return res.json({
         user_tag: user.user_tag,
         icon: user.icon,
@@ -478,10 +633,16 @@ async function handleGetPortfolio(req, res, userTag) {
   }
 }
 
-// NEW: Public profile endpoint for portfolio page
+/**
+ * GET PUBLIC PROFILE - Public Profile Data
+ * GET /api/auth?action=profile&user_tag={tag}
+ * 
+ * Returns user profile data for portfolio pages (without hosted content)
+ * Used by frontend to display user information and portfolio configuration
+ */
 async function handleGetPublicProfile(req, res) {
   const { user_tag } = req.query;
-  
+
   if (!user_tag) {
     return res.status(400).json({ error: 'User tag required' });
   }
@@ -495,24 +656,25 @@ async function handleGetPublicProfile(req, res) {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  // Return complete public profile data for portfolio page
+  // Return public profile data
+  // Content is null for security (hosted content is served via separate endpoint)
   return res.json({
-    // Basic info
+    // Basic user information
     user_tag: user.user_tag,
     userId: user.userId,
     icon: user.icon,
     description: user.description,
     portfolio_url: user.portfolio_url,
     created_at: user.created_at,
-    
-    // Portfolio configuration
+
+    // Portfolio configuration (without actual content)
     portfolio: {
       type: user.portfolio?.type || 'none',
-      content: null, // Don't expose content for security (handled by separate endpoint)
+      content: null,  // Not exposed for security
       redirect_url: user.portfolio?.type === 'redirect' ? user.portfolio?.redirect_url : null
     },
-    
-    // Metadata
+
+    // Status message
     message: user.portfolio?.type === 'none' ? 'This user has a minimal profile' : 'Portfolio configured'
   });
 }
