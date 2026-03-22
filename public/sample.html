@@ -38,16 +38,10 @@
         width: 280px;
         height: 100vh;
         box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
       }
       .sidebar.open {
         transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0 !important;
-        padding: 1rem !important;
-      }
-      .mobile-menu-btn {
-        display: flex;
       }
       .overlay {
         display: none;
@@ -149,6 +143,16 @@
         width: 100%;
       }
     }
+
+    /* Profile Form Styles */
+    .profile-input {
+      transition: all 0.2s ease;
+    }
+    .profile-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
   </style>
 </head>
 <body class="custom-scrollbar relative">
@@ -170,7 +174,6 @@
               <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Creator Suite</p>
             </div>
           </div>
-          <!-- Close button for mobile -->
           <button id="closeSidebarBtn" class="md:hidden w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
             <i class="fas fa-times"></i>
           </button>
@@ -212,7 +215,7 @@
 
     <!-- Main Content -->
     <main id="mainContent" class="flex-1 md:ml-72 p-4 md:p-10 transition-all">
-      <!-- Mobile Header with Menu Button -->
+      <!-- Mobile Header -->
       <div class="md:hidden flex items-center justify-between mb-6 sticky top-0 bg-white/80 backdrop-blur z-40 p-4 -mt-4 -mx-4 px-4 pb-4">
         <div class="flex items-center gap-2">
           <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
@@ -281,17 +284,26 @@
 
     async function fetchWithAuth(url, options = {}) {
       const token = getAuthToken();
-      if (!token) { window.location.href = '/login'; return; }
+      if (!token) { 
+        window.location.href = '/login'; 
+        return null;
+      }
       const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers };
       const response = await fetch(url, { ...options, headers });
-      if (response.status === 401) { localStorage.clear(); window.location.href = '/login'; }
+      if (response.status === 401) { 
+        localStorage.clear(); 
+        window.location.href = '/login';
+        return null;
+      }
       return response;
     }
 
     async function loadUserProfile() {
       const userTag = localStorage.getItem('exploits_user_tag');
-      const userId = localStorage.getItem('exploits_user_id');
-      if (!userTag) { window.location.href = '/login'; return; }
+      if (!userTag) { 
+        window.location.href = '/login'; 
+        return;
+      }
 
       document.getElementById('dashboardUserTag').textContent = `@${userTag}`;
       
@@ -301,10 +313,10 @@
             currentUser = await response.json();
             if(currentUser.icon) document.querySelector('#miniAvatar img').src = currentUser.icon;
         } else {
-            currentUser = { user_tag: userTag, description: 'Digital Architect' };
+            currentUser = { user_tag: userTag, description: 'Digital Architect', icon: 'https://picsum.photos/100' };
         }
       } catch (e) {
-        currentUser = { user_tag: userTag, description: 'Digital Architect' };
+        currentUser = { user_tag: userTag, description: 'Digital Architect', icon: 'https://picsum.photos/100' };
       }
     }
 
@@ -325,6 +337,8 @@
       `;
 
       const response = await fetchWithAuth(`${API_BASE}/projects?action=list`);
+      if (!response) return;
+      
       const { projects = [] } = await response.json();
       const grid = document.getElementById('projectsGrid');
 
@@ -336,7 +350,7 @@
             </div>
             <h3 class="text-lg md:text-xl font-bold text-slate-900">No projects yet</h3>
             <p class="text-slate-500 text-xs md:text-sm mt-1 md:mt-2 mb-4 md:mb-8 px-4">Ready to showcase your next big idea?</p>
-            <button onclick="openProjectModal()" class="text-indigo-600 font-bold text-sm md:text-base hover:underline">Start building <i class="fas fa-arrow-right ml-1"></i></button>
+            <button onclick="window.openProjectModal()" class="text-indigo-600 font-bold text-sm md:text-base hover:underline">Start building <i class="fas fa-arrow-right ml-1"></i></button>
           </div>
         `;
       } else {
@@ -374,18 +388,24 @@
       document.querySelectorAll('.editProjectBtn').forEach(btn => btn.onclick = () => openProjectModal(btn.dataset.slug));
       document.querySelectorAll('.deleteProjectBtn').forEach(btn => btn.onclick = async () => {
           if (confirm('Permanently delete this project?')) {
-              await fetchWithAuth(`${API_BASE}/projects?action=delete`, { method: 'DELETE', body: JSON.stringify({ project_slug: btn.dataset.slug }) });
-              showToast('Project removed'); renderProjects();
+              const response = await fetchWithAuth(`${API_BASE}/projects?action=delete`, { method: 'DELETE', body: JSON.stringify({ project_slug: btn.dataset.slug }) });
+              if (response) {
+                showToast('Project removed'); 
+                renderProjects();
+              }
           }
       });
     }
 
+    window.openProjectModal = openProjectModal;
     async function openProjectModal(slug = null) {
       let project = null;
       if (slug) {
         const res = await fetchWithAuth(`${API_BASE}/projects?action=list`);
-        const { projects } = await res.json();
-        project = projects.find(p => p.slug === slug);
+        if (res) {
+          const { projects } = await res.json();
+          project = projects.find(p => p.slug === slug);
+        }
       }
 
       const modalHtml = `
@@ -455,13 +475,14 @@
         };
 
         if (project) {
-          await fetchWithAuth(`${API_BASE}/projects?action=edit`, { method: 'POST', body: JSON.stringify({ project_slug: project.slug, field: 'name', value: projectData.name }) });
-          showToast('Updated successfully');
+          const response = await fetchWithAuth(`${API_BASE}/projects?action=edit`, { method: 'POST', body: JSON.stringify({ project_slug: project.slug, field: 'name', value: projectData.name }) });
+          if (response) showToast('Updated successfully');
         } else {
-          await fetchWithAuth(`${API_BASE}/projects?action=create`, { method: 'POST', body: JSON.stringify(projectData) });
-          showToast('Project Created');
+          const response = await fetchWithAuth(`${API_BASE}/projects?action=create`, { method: 'POST', body: JSON.stringify(projectData) });
+          if (response) showToast('Project Created');
         }
-        modal.remove(); renderProjects();
+        modal.remove(); 
+        renderProjects();
       };
 
       document.getElementById('closeModalBtn').onclick = () => modal.remove();
@@ -470,6 +491,8 @@
     async function renderPortfolio() {
       const container = document.getElementById('dashboardContent');
       const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { method: 'POST', body: JSON.stringify({ subaction: 'get' }) });
+      if (!response) return;
+      
       const { portfolio = { type: 'none' } } = await response.json();
 
       container.innerHTML = `
@@ -501,6 +524,179 @@
           <button id="savePortfolioBtn" class="btn-primary text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-base">Update Portfolio</button>
         </div>
       `;
+      
+      // Attach event listeners after rendering
+      setTimeout(() => {
+        window.setPortfolioType = async (type) => {
+          const content = type === 'hosted' ? document.getElementById('hostedContent')?.value : null;
+          const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { 
+            method: 'POST', 
+            body: JSON.stringify({ subaction: 'update', portfolio_type: type, portfolio_content: content })
+          });
+          if (response) {
+            showToast('Portfolio mode updated');
+            renderPortfolio();
+          }
+        };
+        
+        document.getElementById('savePortfolioBtn').onclick = async () => {
+          const selectedType = document.querySelector('.mode-card.border-indigo-500')?.innerText.toLowerCase().includes('hosted') ? 'hosted' : 
+                              document.querySelector('.mode-card.border-indigo-500')?.innerText.toLowerCase().includes('redirect') ? 'redirect' : 'none';
+          const content = document.getElementById('hostedContent')?.value;
+          const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { 
+            method: 'POST', 
+            body: JSON.stringify({ subaction: 'update', portfolio_type: selectedType, portfolio_content: content })
+          });
+          if (response) showToast('Portfolio updated');
+        };
+      }, 100);
+    }
+
+    async function renderProfile() {
+      const container = document.getElementById('dashboardContent');
+      const userTag = localStorage.getItem('exploits_user_tag');
+      
+      // Fetch fresh user data
+      let userData = currentUser;
+      try {
+        const response = await fetch(`${API_BASE}/auth?user_tag=${userTag}`);
+        if (response.ok) {
+          userData = await response.json();
+          currentUser = userData;
+        }
+      } catch (e) {
+        console.error('Error fetching user data:', e);
+      }
+      
+      container.innerHTML = `
+        <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-6 md:mb-10">Profile Settings</h1>
+        <div class="bg-white rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm p-5 md:p-10 max-w-2xl">
+          <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
+            <div class="relative">
+              <img src="${userData?.icon || 'https://picsum.photos/200/200'}" 
+                   class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-indigo-100"
+                   id="profileAvatar"
+                   onerror="this.src='https://ui-avatars.com/api/?name=${userTag}&background=4f46e5&color=fff&size=128'">
+              <button id="updateAvatarBtn" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition shadow-lg">
+                <i class="fas fa-camera text-xs"></i>
+              </button>
+            </div>
+            <div class="flex-1 text-center md:text-left">
+              <p class="text-sm text-slate-500 mb-1">Username</p>
+              <p class="text-xl font-bold text-slate-900">@${userTag}</p>
+              <p class="text-xs text-slate-400 mt-1">Your unique portfolio identifier</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Profile Icon URL</label>
+              <input type="text" id="iconUrl" class="profile-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 transition" 
+                     value="${escapeHtml(userData?.icon || '')}" placeholder="https://example.com/avatar.jpg">
+              <p class="text-xs text-slate-400 mt-1">Enter a direct image URL for your profile picture</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Bio / Description</label>
+              <textarea id="userBio" rows="4" class="profile-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 transition" 
+                        placeholder="Tell the world about yourself...">${escapeHtml(userData?.description || '')}</textarea>
+              <p class="text-xs text-slate-400 mt-1">Share your story, skills, and what you create</p>
+            </div>
+          </div>
+          
+          <button id="saveProfileBtn" class="btn-primary text-white px-6 py-3 rounded-xl font-bold mt-8 w-full md:w-auto">
+            Save Profile Changes
+          </button>
+        </div>
+      `;
+      
+      // Attach event listeners
+      document.getElementById('saveProfileBtn').onclick = async () => {
+        const newIcon = document.getElementById('iconUrl').value;
+        const newBio = document.getElementById('userBio').value;
+        
+        let success = true;
+        
+        if (newIcon !== currentUser?.icon) {
+          const response = await fetchWithAuth(`${API_BASE}/auth?action=edit`, {
+            method: 'POST',
+            body: JSON.stringify({ field: 'icon', value: newIcon })
+          });
+          if (response) {
+            if (currentUser) currentUser.icon = newIcon;
+          } else {
+            success = false;
+          }
+        }
+        
+        if (newBio !== currentUser?.description) {
+          const response = await fetchWithAuth(`${API_BASE}/auth?action=edit`, {
+            method: 'POST',
+            body: JSON.stringify({ field: 'description', value: newBio })
+          });
+          if (response) {
+            if (currentUser) currentUser.description = newBio;
+          } else {
+            success = false;
+          }
+        }
+        
+        if (success) {
+          showToast('Profile updated successfully');
+          // Update avatar in sidebar
+          if (newIcon) document.querySelector('#miniAvatar img').src = newIcon;
+          renderProfile(); // Refresh to show updated values
+        }
+      };
+      
+      document.getElementById('updateAvatarBtn').onclick = () => {
+        const iconInput = document.getElementById('iconUrl');
+        iconInput.focus();
+        showToast('Enter a new image URL above');
+      };
+    }
+
+    async function renderAnalytics() {
+      const container = document.getElementById('dashboardContent');
+      const response = await fetchWithAuth(`${API_BASE}/analytics?action=list`);
+      const { sessions = [] } = response ? await response.json() : { sessions: [] };
+      
+      if (sessions.length === 0) {
+        container.innerHTML = `
+          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics</h1>
+          <div class="py-12 md:py-20 text-center glass-card rounded-2xl md:rounded-[2.5rem]">
+            <i class="fas fa-chart-line text-3xl md:text-4xl text-slate-200 mb-3 md:mb-4"></i>
+            <p class="text-slate-500 font-medium text-sm md:text-base">No analytics data yet. Enable analytics on your projects to start tracking.</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics Dashboard</h1>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            ${sessions.map(session => `
+              <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                  <h3 class="font-bold text-lg">${escapeHtml(session.project_name)}</h3>
+                  <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">Active</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p class="text-slate-500 text-xs">Total Visits</p>
+                    <p class="text-2xl font-bold text-slate-900">${session.total_visits || 0}</p>
+                  </div>
+                  <div>
+                    <p class="text-slate-500 text-xs">Unique Visitors</p>
+                    <p class="text-2xl font-bold text-slate-900">${session.unique_visitors || 0}</p>
+                  </div>
+                </div>
+                <div class="text-xs text-slate-500">
+                  <i class="fas fa-link mr-1"></i> Tracking URL: <code class="break-all">${session.tracking_url || 'Not configured'}</code>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
     }
 
     async function switchTab(tab) {
@@ -514,13 +710,14 @@
 
       if (tab === 'projects') await renderProjects();
       else if (tab === 'portfolio') await renderPortfolio();
-      else if (tab === 'analytics') document.getElementById('dashboardContent').innerHTML = '<h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics</h1><div class="py-12 md:py-20 text-center glass-card rounded-2xl md:rounded-[2.5rem]"><i class="fas fa-chart-line text-3xl md:text-4xl text-slate-200 mb-3 md:mb-4"></i><p class="text-slate-500 font-medium text-sm md:text-base">Tracking data will appear here shortly.</p></div>';
-      else if (tab === 'profile') document.getElementById('dashboardContent').innerHTML = '<h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Profile</h1><div class="glass-card rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 max-w-2xl"><div class="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-slate-100 mb-4 md:mb-6"></div><div class="h-8 md:h-10 w-32 md:w-48 bg-slate-100 rounded-lg md:rounded-xl mb-3 md:mb-4"></div><div class="h-20 md:h-32 w-full bg-slate-50 rounded-xl md:rounded-2xl"></div></div>';
+      else if (tab === 'analytics') await renderAnalytics();
+      else if (tab === 'profile') await renderProfile();
     }
 
     function escapeHtml(text) {
+      if (!text) return '';
       const div = document.createElement('div');
-      div.textContent = text || '';
+      div.textContent = text;
       return div.innerHTML;
     }
 
