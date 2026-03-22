@@ -15,10 +15,6 @@
       backdrop-filter: blur(10px);
       border-radius: 2rem;
     }
-    .input-focus:focus {
-      ring: 2px solid #3b82f6;
-      border-color: transparent;
-    }
   </style>
 </head>
 <body class="flex items-center justify-center p-4">
@@ -91,7 +87,6 @@
       setTimeout(() => toast.classList.add('hidden'), 3000);
     }
 
-    // Store token and redirect
     function storeAuth(token, userTag, userId, portfolioUrl) {
       localStorage.setItem('exploits_token', token);
       localStorage.setItem('exploits_user_tag', userTag);
@@ -99,7 +94,6 @@
       localStorage.setItem('exploits_portfolio_url', portfolioUrl);
     }
 
-    // Login handler
     async function handleLogin(email, password) {
       try {
         const response = await fetch(`${API_BASE}?action=login`, {
@@ -117,14 +111,13 @@
         storeAuth(data.token, data.user_tag, data.userId, data.portfolio_url);
         showToast('Login successful! Redirecting...');
         setTimeout(() => {
-          window.location.href = '/dashboard.html';
+          window.location.href = '/dashboard';
         }, 1000);
       } catch (error) {
         showToast(error.message, true);
       }
     }
 
-    // Register handler
     async function handleRegister(email, password, userTag, description) {
       try {
         const response = await fetch(`${API_BASE}?action=create`, {
@@ -148,7 +141,7 @@
         storeAuth(data.token, data.user_tag, data.userId, data.portfolio_url);
         showToast('Account created! Redirecting to dashboard...');
         setTimeout(() => {
-          window.location.href = '/dashboard.html';
+          window.location.href = '/dashboard';
         }, 1000);
       } catch (error) {
         showToast(error.message, true);
@@ -179,7 +172,6 @@
       loginForm.classList.add('hidden');
     });
     
-    // Button handlers
     document.getElementById('loginBtn').addEventListener('click', () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
