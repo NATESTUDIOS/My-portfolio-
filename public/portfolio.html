@@ -66,10 +66,9 @@
       return urlParams.get('user_slug');
     }
 
-    // Fetch user data from auth API using the new profile endpoint
+    // Fetch user data from auth API using the profile endpoint
     async function fetchUserData(userSlug) {
       try {
-        // Using the new profile endpoint that returns complete user data
         const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
         
         if (!response.ok) {
@@ -95,7 +94,7 @@
         
         if (!response.ok) {
           console.warn('Projects API returned:', response.status);
-          return []; // Return empty array if no projects or error
+          return [];
         }
         
         const data = await response.json();
@@ -104,16 +103,6 @@
       } catch (error) {
         console.error('Error fetching projects:', error);
         return [];
-      }
-    }
-
-    // Track portfolio visit
-    async function trackVisit(userId, userSlug) {
-      try {
-        console.log(`Portfolio visited: @${userSlug} (${userId})`);
-        // You can add analytics tracking here if needed
-      } catch (error) {
-        console.error('Tracking error:', error);
       }
     }
 
@@ -126,7 +115,7 @@
             <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Oops!</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Portfolio Not Found</h2>
             <p class="text-gray-600 mb-6">${escapeHtml(message)}</p>
             <div class="space-y-3">
               <a href="/" class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition">
@@ -141,48 +130,25 @@
       `;
     }
 
-    // Render portfolio based on type
-    async function renderPortfolio(user, projects) {
-      const portfolio = user.portfolio || { type: 'none' };
-
-      // Handle hosted portfolio
-      if (portfolio.type === 'hosted') {
-        // For hosted portfolios, we need to fetch the actual HTML content
-        // from the original endpoint that returns the full HTML
-        try {
-          const hostedResponse = await fetch(`${API_BASE}/auth?user_tag=${user.user_tag}`);
-          if (hostedResponse.ok) {
-            const html = await hostedResponse.text();
-            document.getElementById('app').innerHTML = html;
-            trackVisit(user.userId, user.user_tag);
-            return;
-          }
-        } catch (error) {
-          console.error('Error loading hosted portfolio:', error);
-          // Fall through to minimal profile
-        }
-      }
-
-      // Handle redirect portfolio
-      if (portfolio.type === 'redirect' && portfolio.redirect_url) {
-        window.location.href = portfolio.redirect_url;
-        return;
-      }
-
-      // Render minimal profile (default)
-      renderMinimalProfile(user, projects);
-      trackVisit(user.userId, user.user_tag);
-    }
-
-    // Render minimal profile with projects grid
-    function renderMinimalProfile(user, projects) {
+    // Render beautiful portfolio from JSON data
+    function renderPortfolioFromJSON(user, projects) {
       const app = document.getElementById('app');
-
+      
       // Calculate stats
       const totalProjects = projects.length;
       const hostedProjects = projects.filter(p => p.type === 'hosted').length;
-      const publicProjects = projects.filter(p => p.visibility === 'public').length;
-
+      const linkProjects = projects.filter(p => p.type === 'link').length;
+      const imageProjects = projects.filter(p => p.type === 'image').length;
+      
+      // Format join date
+      const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      }) : 'Recently';
+      
+      // Get portfolio type from user data
+      const portfolioType = user.portfolio?.type || 'none';
+      
       app.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <!-- Hero Section -->
@@ -192,7 +158,7 @@
               <div class="relative">
                 <img src="${user.icon || 'https://picsum.photos/200/200'}" 
                      class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=3b82f6&color=fff&size=200'">
+                     onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=667eea&color=fff&size=200&bold=true'">
                 <div class="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 shadow-lg">
                   <i class="fas fa-check-circle text-white text-sm"></i>
                 </div>
@@ -202,8 +168,8 @@
               <div class="flex-1 text-center md:text-left">
                 <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                   <h1 class="text-3xl md:text-4xl font-bold text-gray-800">${escapeHtml(user.user_tag)}</h1>
-                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm self-center md:self-auto">
-                    <i class="fas fa-map-marker-alt text-xs"></i> Portfolio
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm self-center md:self-auto">
+                    <i class="fas fa-star text-xs"></i> Portfolio
                   </span>
                 </div>
                 <p class="text-gray-600 text-lg mb-4 max-w-2xl">${escapeHtml(user.description || 'Creative developer & designer passionate about building amazing digital experiences.')}</p>
@@ -212,7 +178,7 @@
                 <div class="flex flex-wrap gap-4 justify-center md:justify-start">
                   <div class="flex items-center gap-2 text-gray-600">
                     <i class="fas fa-calendar-alt text-blue-500"></i>
-                    <span class="text-sm">Joined ${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}</span>
+                    <span class="text-sm">Joined ${joinDate}</span>
                   </div>
                   <div class="flex items-center gap-2 text-gray-600">
                     <i class="fas fa-folder-open text-purple-500"></i>
@@ -223,13 +189,19 @@
                     <span class="text-sm">${hostedProjects} Hosted</span>
                   </div>
                   <div class="flex items-center gap-2 text-gray-600">
-                    <i class="fas fa-globe text-orange-500"></i>
-                    <span class="text-sm">${publicProjects} Public</span>
+                    <i class="fas fa-external-link-alt text-orange-500"></i>
+                    <span class="text-sm">${linkProjects} Links</span>
                   </div>
                 </div>
                 
-                <!-- Portfolio URL Badge -->
+                <!-- Portfolio Status Badge -->
                 <div class="mt-4 inline-flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
+                  <i class="fas ${portfolioType === 'hosted' ? 'fa-code' : portfolioType === 'redirect' ? 'fa-external-link-alt' : 'fa-user'} text-gray-500 text-sm"></i>
+                  <span class="text-xs text-gray-600">Portfolio Mode: ${portfolioType === 'hosted' ? 'Custom HTML' : portfolioType === 'redirect' ? 'Redirect' : 'Minimal Profile'}</span>
+                </div>
+                
+                <!-- Portfolio URL Badge -->
+                <div class="mt-3 inline-flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
                   <i class="fas fa-link text-gray-500 text-sm"></i>
                   <code class="text-xs text-gray-600">myexploits.vercel.app/portfolio?user_slug=${user.user_tag}</code>
                   <button onclick="copyUrl()" class="text-blue-500 hover:text-blue-600 text-sm ml-2">
@@ -240,8 +212,8 @@
               
               <!-- CTA Button -->
               <div class="md:self-start">
-                <a href="/login" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition">
-                  <i class="fas fa-rocket"></i> Create Your Portfolio
+                <a href="/login" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition transform hover:scale-105">
+                  <i class="fas fa-rocket"></i> Create Yours
                 </a>
               </div>
             </div>
@@ -253,35 +225,34 @@
               <h2 class="text-2xl md:text-3xl font-bold text-white">
                 <i class="fas fa-code mr-3"></i>Featured Projects
               </h2>
-              ${projects.length > 0 ? `
+              ${totalProjects > 0 ? `
                 <div class="flex gap-2">
                   <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-lg bg-white/20 backdrop-blur text-white text-sm font-medium hover:bg-white/30 transition">
-                    All
+                    All (${totalProjects})
                   </button>
                   <button onclick="filterProjects('hosted')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
-                    Hosted
+                    Hosted (${hostedProjects})
                   </button>
                   <button onclick="filterProjects('link')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
-                    Links
+                    Links (${linkProjects})
                   </button>
                 </div>
               ` : ''}
             </div>
             
             <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              ${projects.length > 0 ? projects.map(project => `
+              ${totalProjects > 0 ? projects.map(project => `
                 <div class="project-card bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer" data-type="${project.type}" data-visibility="${project.visibility}" onclick="viewProject('${project.user_id}', '${project.slug}')">
-                  <div class="relative">
-                    <img src="${project.image}" class="w-full h-48 object-cover" onerror="this.src='https://picsum.photos/400/300'">
+                  <div class="relative overflow-hidden">
+                    <img src="${project.image}" class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://picsum.photos/400/300?random=1'">
                     <div class="absolute top-3 right-3 flex gap-2">
-                      <span class="px-2 py-1 rounded-lg text-xs font-semibold ${project.type === 'hosted' ? 'bg-purple-600 text-white' : project.type === 'link' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}">
+                      <span class="px-2 py-1 rounded-lg text-xs font-semibold shadow-lg ${project.type === 'hosted' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : project.type === 'link' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'}">
                         ${project.type === 'hosted' ? '<i class="fas fa-code mr-1"></i> Hosted' : project.type === 'link' ? '<i class="fas fa-external-link-alt mr-1"></i> Link' : '<i class="fas fa-image mr-1"></i> Image'}
                       </span>
-                      ${project.visibility === 'public' ? '<span class="px-2 py-1 rounded-lg bg-green-600 text-white text-xs"><i class="fas fa-globe mr-1"></i> Public</span>' : ''}
                     </div>
                   </div>
                   <div class="p-5">
-                    <h3 class="font-bold text-xl mb-2 text-gray-800">${escapeHtml(project.name)}</h3>
+                    <h3 class="font-bold text-xl mb-2 text-gray-800 line-clamp-1">${escapeHtml(project.name)}</h3>
                     <p class="text-gray-600 text-sm mb-4 line-clamp-2">${escapeHtml(project.description || 'No description available.')}</p>
                     
                     <div class="flex items-center justify-between">
@@ -289,7 +260,7 @@
                         <i class="far fa-calendar-alt"></i>
                         <span>${new Date(project.created_at).toLocaleDateString()}</span>
                       </div>
-                      <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      <button class="text-blue-600 hover:text-purple-600 text-sm font-medium transition">
                         View Project <i class="fas fa-arrow-right ml-1"></i>
                       </button>
                     </div>
@@ -298,10 +269,12 @@
               `).join('') : `
                 <div class="col-span-full">
                   <div class="glass-card p-12 text-center">
-                    <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <i class="fas fa-paintbrush text-white text-3xl"></i>
+                    </div>
                     <h3 class="text-xl font-semibold text-gray-700 mb-2">No Public Projects Yet</h3>
-                    <p class="text-gray-500 mb-4">This user hasn't published any projects yet.</p>
-                    <a href="/login" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                    <p class="text-gray-500 mb-4 max-w-md mx-auto">This creator is crafting something amazing. Check back soon for updates!</p>
+                    <a href="/login" class="inline-flex items-center gap-2 text-blue-600 hover:text-purple-600 font-semibold transition">
                       Create your first project <i class="fas fa-arrow-right"></i>
                     </a>
                   </div>
@@ -327,20 +300,18 @@
     window.filterProjects = function(type) {
       const projects = document.querySelectorAll('.project-card');
       const buttons = document.querySelectorAll('.filter-btn');
-
+      
       buttons.forEach(btn => {
         btn.classList.remove('active', 'bg-white/20', 'text-white');
         btn.classList.add('bg-white/10', 'text-white/80');
-        if (btn.textContent.toLowerCase().includes(type === 'all' ? 'all' : type)) {
+        if (btn.textContent.toLowerCase().includes(type)) {
           btn.classList.add('active', 'bg-white/20', 'text-white');
           btn.classList.remove('bg-white/10', 'text-white/80');
         }
       });
-
+      
       projects.forEach(project => {
-        if (type === 'all') {
-          project.style.display = 'block';
-        } else if (project.dataset.type === type) {
+        if (type === 'all' || project.dataset.type === type) {
           project.style.display = 'block';
         } else {
           project.style.display = 'none';
@@ -359,7 +330,7 @@
       navigator.clipboard.writeText(url).then(() => {
         const tooltip = document.createElement('div');
         tooltip.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50';
-        tooltip.innerHTML = '<i class="fas fa-check mr-2"></i>URL copied to clipboard!';
+        tooltip.innerHTML = '<i class="fas fa-check mr-2"></i>URL copied!';
         document.body.appendChild(tooltip);
         setTimeout(() => tooltip.remove(), 2000);
       });
@@ -376,12 +347,12 @@
     // Initialize page
     async function init() {
       const userSlug = getUserSlug();
-
+      
       if (!userSlug) {
         renderError('No user specified. Please provide a valid username (e.g., ?user_slug=username).');
         return;
       }
-
+      
       // Show loading with username
       const app = document.getElementById('app');
       app.innerHTML = `
@@ -392,21 +363,21 @@
           </div>
         </div>
       `;
-
+      
       try {
-        // Fetch user data using the new profile endpoint
+        // Fetch user data from profile endpoint
         const user = await fetchUserData(userSlug);
         
         // Fetch user's public projects
         const projects = await fetchUserProjects(userSlug);
-
-        // Render portfolio based on user's settings
-        await renderPortfolio(user, projects);
-
+        
+        // Render portfolio using JSON data only
+        renderPortfolioFromJSON(user, projects);
+        
         // Update page title
         document.title = `${user.user_tag} | Portfolio - Exploits`;
-
-        // Add or update meta tags for social sharing
+        
+        // Add meta description
         let metaDescription = document.querySelector('meta[name="description"]');
         if (!metaDescription) {
           metaDescription = document.createElement('meta');
@@ -414,7 +385,7 @@
           document.head.appendChild(metaDescription);
         }
         metaDescription.content = user.description || `Check out ${user.user_tag}'s portfolio on Exploits`;
-
+        
       } catch (error) {
         console.error('Error:', error);
         if (error.message === 'User not found') {
@@ -426,7 +397,7 @@
         }
       }
     }
-
+    
     // Start the app
     init();
   </script>
