@@ -35,7 +35,7 @@
         </div>
         <p class="text-xs text-gray-400 mt-2" id="dashboardUserTag">Loading...</p>
       </div>
-      
+
       <nav class="p-4 flex flex-col gap-1">
         <div data-tab="projects" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-gray-700">
           <i class="fas fa-folder-open w-5"></i><span>My Projects</span>
@@ -50,7 +50,7 @@
           <i class="fas fa-id-card w-5"></i><span>Profile</span>
         </div>
       </nav>
-      
+
       <div class="absolute bottom-6 left-0 right-0 px-6">
         <button id="logoutBtn" class="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl transition">
           <i class="fas fa-sign-out-alt"></i> Sign Out
@@ -70,7 +70,7 @@
     const API_BASE = 'https://myexploits.vercel.app/api';
     let currentUser = null;
     let activeTab = 'projects';
-    
+
     function showToast(message, isError = false) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -78,21 +78,23 @@
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('hidden'), 3000);
     }
-    
+
     function getAuthToken() {
       return localStorage.getItem('exploits_token');
     }
-    
+
     async function fetchWithAuth(url, options = {}) {
       const token = getAuthToken();
-      if (!token) throw new Error('No auth token');
-      
+      if (!token) {
+        throw new Error('No auth token');
+      }
+
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
         ...options.headers
       };
-      
+
       const response = await fetch(url, { ...options, headers });
       if (response.status === 401) {
         localStorage.clear();
@@ -101,37 +103,78 @@
       }
       return response;
     }
-    
+
     async function loadUserProfile() {
       const userTag = localStorage.getItem('exploits_user_tag');
-      if (!userTag) return null;
+      const userId = localStorage.getItem('exploits_user_id');
+      const portfolioUrl = localStorage.getItem('exploits_portfolio_url');
       
+      if (!userTag || !userId) {
+        console.log('Missing auth data, redirecting to login');
+        window.location.href = '/login';
+        return null;
+      }
+
       try {
+        // First, try to get the user profile from the auth endpoint
         const response = await fetch(`${API_BASE}/auth?user_tag=${userTag}`);
+        
+        if (!response.ok) {
+          console.error('Failed to fetch user profile:', response.status);
+          // If the endpoint fails, create a minimal user object from localStorage data
+          currentUser = {
+            user_tag: userTag,
+            userId: userId,
+            portfolio_url: portfolioUrl,
+            icon: 'https://picsum.photos/200/200',
+            description: 'Creative developer',
+            portfolio: { type: 'none' },
+            created_at: new Date().toISOString()
+          };
+          
+          document.getElementById('dashboardUserTag').innerHTML = `<i class="fas fa-at text-xs"></i> @${userTag}`;
+          return currentUser;
+        }
+        
         const data = await response.json();
-        if (!response.ok) throw new Error('Failed to load profile');
         
         currentUser = {
           ...data,
           user_tag: userTag,
-          userId: localStorage.getItem('exploits_user_id'),
-          portfolio_url: localStorage.getItem('exploits_portfolio_url')
+          userId: userId,
+          portfolio_url: portfolioUrl || `https://myexploits.vercel.app/portfolio?user_slug=${userTag}`
         };
-        
+
         document.getElementById('dashboardUserTag').innerHTML = `<i class="fas fa-at text-xs"></i> @${userTag}`;
         return currentUser;
       } catch (error) {
         console.error('Error loading profile:', error);
-        return null;
+        // Create fallback user data
+        currentUser = {
+          user_tag: userTag,
+          userId: userId,
+          portfolio_url: portfolioUrl,
+          icon: 'https://picsum.photos/200/200',
+          description: 'Creative developer',
+          portfolio: { type: 'none' },
+          created_at: new Date().toISOString()
+        };
+        document.getElementById('dashboardUserTag').innerHTML = `<i class="fas fa-at text-xs"></i> @${userTag}`;
+        return currentUser;
       }
     }
-    
+
     async function getUserProjects() {
-      const response = await fetchWithAuth(`${API_BASE}/projects?action=list`);
-      const data = await response.json();
-      return data.projects || [];
+      try {
+        const response = await fetchWithAuth(`${API_BASE}/projects?action=list`);
+        const data = await response.json();
+        return data.projects || [];
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        return [];
+      }
     }
-    
+
     async function createProject(projectData) {
       const response = await fetchWithAuth(`${API_BASE}/projects?action=create`, {
         method: 'POST',
@@ -139,7 +182,7 @@
       });
       return await response.json();
     }
-    
+
     async function updateProject(projectSlug, field, value) {
       const response = await fetchWithAuth(`${API_BASE}/projects?action=edit`, {
         method: 'POST',
@@ -147,7 +190,7 @@
       });
       return await response.json();
     }
-    
+
     async function deleteProject(projectSlug) {
       const response = await fetchWithAuth(`${API_BASE}/projects?action=delete`, {
         method: 'DELETE',
@@ -155,16 +198,21 @@
       });
       return await response.json();
     }
-    
+
     async function getPortfolio() {
-      const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, {
-        method: 'POST',
-        body: JSON.stringify({ subaction: 'get' })
-      });
-      const data = await response.json();
-      return data.portfolio;
+      try {
+        const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, {
+          method: 'POST',
+          body: JSON.stringify({ subaction: 'get' })
+        });
+        const data = await response.json();
+        return data.portfolio || { type: 'none' };
+      } catch (error) {
+        console.error('Error fetching portfolio:', error);
+        return { type: 'none' };
+      }
     }
-    
+
     async function updatePortfolio(portfolioType, content, redirectUrl) {
       const payload = {
         subaction: 'update',
@@ -172,14 +220,14 @@
       };
       if (portfolioType === 'hosted') payload.portfolio_content = content;
       if (portfolioType === 'redirect') payload.portfolio_redirect = redirectUrl;
-      
+
       const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
       return await response.json();
     }
-    
+
     async function updateProfile(field, value) {
       const response = await fetchWithAuth(`${API_BASE}/auth?action=edit`, {
         method: 'POST',
@@ -187,13 +235,18 @@
       });
       return await response.json();
     }
-    
+
     async function getUserAnalytics() {
-      const response = await fetchWithAuth(`${API_BASE}/analytics?action=list`);
-      const data = await response.json();
-      return data.sessions || [];
+      try {
+        const response = await fetchWithAuth(`${API_BASE}/analytics?action=list`);
+        const data = await response.json();
+        return data.sessions || [];
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        return [];
+      }
     }
-    
+
     async function renderProjects() {
       const container = document.getElementById('dashboardContent');
       container.innerHTML = `
@@ -205,10 +258,10 @@
         </div>
         <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
       `;
-      
+
       const projects = await getUserProjects();
       const grid = document.getElementById('projectsGrid');
-      
+
       if (projects.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-gray-200">
@@ -226,8 +279,8 @@
               </span>
             </div>
             <img src="${proj.image}" class="w-full h-36 object-cover rounded-xl mb-3" onerror="this.src='https://picsum.photos/400/240'">
-            <h3 class="font-bold text-lg">${proj.name}</h3>
-            <p class="text-gray-500 text-sm mt-1 line-clamp-2">${proj.description || 'No description'}</p>
+            <h3 class="font-bold text-lg">${escapeHtml(proj.name)}</h3>
+            <p class="text-gray-500 text-sm mt-1 line-clamp-2">${escapeHtml(proj.description || 'No description')}</p>
             ${proj.hosted_url ? `<a href="${proj.hosted_url}" target="_blank" class="text-blue-600 text-sm flex items-center gap-1 mt-2 hover:underline"><i class="fas fa-external-link-alt"></i> View hosted project</a>` : ''}
             <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
               <button data-slug="${proj.slug}" class="editProjectBtn flex-1 text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">Edit</button>
@@ -236,7 +289,7 @@
           </div>
         `).join('');
       }
-      
+
       document.getElementById('newProjectBtn').onclick = () => openProjectModal();
       document.querySelectorAll('.editProjectBtn').forEach(btn => {
         btn.onclick = () => openProjectModal(btn.dataset.slug);
@@ -251,21 +304,28 @@
         };
       });
     }
-    
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     async function openProjectModal(slug = null) {
       let project = null;
       if (slug) {
         const projects = await getUserProjects();
         project = projects.find(p => p.slug === slug);
       }
-      
+
       const modalHtml = `
         <div id="projectModal" class="modal">
           <div class="modal-content p-6">
             <h2 class="text-2xl font-bold mb-4">${project ? 'Edit Project' : 'Create New Project'}</h2>
             <div class="space-y-3">
-              <input id="projName" type="text" placeholder="Project Name" class="w-full px-4 py-2 border border-gray-200 rounded-xl" value="${project?.name || ''}">
-              <textarea id="projDesc" placeholder="Description" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-xl">${project?.description || ''}</textarea>
+              <input id="projName" type="text" placeholder="Project Name" class="w-full px-4 py-2 border border-gray-200 rounded-xl" value="${escapeHtml(project?.name || '')}">
+              <textarea id="projDesc" placeholder="Description" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-xl">${escapeHtml(project?.description || '')}</textarea>
               <input id="projImage" type="text" placeholder="Image URL" class="w-full px-4 py-2 border border-gray-200 rounded-xl" value="${project?.image || 'https://picsum.photos/400/240'}">
               <select id="projType" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
                 <option value="image" ${project?.type === 'image' ? 'selected' : ''}>Image/Link Project</option>
@@ -283,7 +343,7 @@
               </label>
               <div id="hostedContentDiv" class="${project?.type === 'hosted' ? '' : 'hidden'}">
                 <label class="block text-sm font-medium mb-1">HTML Content</label>
-                <textarea id="projContent" rows="8" class="w-full px-4 py-2 border border-gray-200 rounded-xl font-mono text-sm">${project?.content || '<div class="p-8 text-center"><h2>✨ My Project</h2><p>Welcome to my hosted project on Exploits!</p></div>'}</textarea>
+                <textarea id="projContent" rows="8" class="w-full px-4 py-2 border border-gray-200 rounded-xl font-mono text-sm">${escapeHtml(project?.content || '<div class="p-8 text-center"><h2>✨ My Project</h2><p>Welcome to my hosted project on Exploits!</p></div>')}</textarea>
               </div>
             </div>
             <div class="flex gap-3 mt-6">
@@ -293,23 +353,23 @@
           </div>
         </div>
       `;
-      
+
       document.body.insertAdjacentHTML('beforeend', modalHtml);
       const modal = document.getElementById('projectModal');
       const typeSelect = document.getElementById('projType');
       const hostedDiv = document.getElementById('hostedContentDiv');
-      
+
       typeSelect.onchange = () => {
         hostedDiv.classList.toggle('hidden', typeSelect.value !== 'hosted');
       };
-      
+
       document.getElementById('saveProjectBtn').onclick = async () => {
         const name = document.getElementById('projName').value;
         if (!name) {
           showToast('Project name is required', true);
           return;
         }
-        
+
         const projectData = {
           name,
           description: document.getElementById('projDesc').value,
@@ -318,11 +378,11 @@
           visibility: document.getElementById('projVisibility').value,
           analytics_enabled: document.getElementById('projAnalytics').checked
         };
-        
+
         if (typeSelect.value === 'hosted') {
           projectData.content = document.getElementById('projContent').value;
         }
-        
+
         if (project) {
           for (const [field, value] of Object.entries(projectData)) {
             if (value !== project[field]) {
@@ -334,18 +394,18 @@
           await createProject(projectData);
           showToast('Project created successfully');
         }
-        
+
         modal.remove();
         renderProjects();
       };
-      
+
       document.getElementById('closeModalBtn').onclick = () => modal.remove();
     }
-    
+
     async function renderPortfolio() {
       const container = document.getElementById('dashboardContent');
       const portfolio = await getPortfolio();
-      
+
       container.innerHTML = `
         <h1 class="text-3xl font-bold mb-6">🎨 Portfolio Settings</h1>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-3xl">
@@ -360,7 +420,7 @@
           
           <div id="hostedArea" class="mb-6 ${portfolio.type === 'hosted' ? '' : 'hidden'}">
             <label class="block font-semibold mb-2">Portfolio HTML Content</label>
-            <textarea id="hostedContent" rows="12" class="w-full px-4 py-3 border border-gray-200 rounded-xl font-mono text-sm">${portfolio.content || '<div style="text-align:center;padding:40px"><h1>Welcome to my portfolio</h1><p>Built with Exploits</p></div>'}</textarea>
+            <textarea id="hostedContent" rows="12" class="w-full px-4 py-3 border border-gray-200 rounded-xl font-mono text-sm">${escapeHtml(portfolio.content || '<div style="text-align:center;padding:40px"><h1>Welcome to my portfolio</h1><p>Built with Exploits</p></div>')}</textarea>
             <p class="text-xs text-gray-400 mt-1">✨ Full HTML/CSS/JS supported. Scripts and styles will be preserved.</p>
           </div>
           
@@ -377,44 +437,44 @@
           </div>
         </div>
       `;
-      
+
       const typeSelect = document.getElementById('portfolioType');
       const hostedArea = document.getElementById('hostedArea');
       const redirectArea = document.getElementById('redirectArea');
-      
+
       typeSelect.onchange = () => {
         hostedArea.classList.toggle('hidden', typeSelect.value !== 'hosted');
         redirectArea.classList.toggle('hidden', typeSelect.value !== 'redirect');
       };
-      
+
       document.getElementById('savePortfolioBtn').onclick = async () => {
         const type = typeSelect.value;
         let content = null;
         let redirectUrl = null;
-        
+
         if (type === 'hosted') {
           content = document.getElementById('hostedContent').value;
         } else if (type === 'redirect') {
           redirectUrl = document.getElementById('redirectUrl').value;
         }
-        
+
         await updatePortfolio(type, content, redirectUrl);
         showToast('Portfolio updated successfully');
         renderPortfolio();
       };
     }
-    
+
     async function renderAnalytics() {
       const container = document.getElementById('dashboardContent');
       const analytics = await getUserAnalytics();
-      
+
       container.innerHTML = `
         <h1 class="text-3xl font-bold mb-6">📊 Analytics Dashboard</h1>
         <div id="analyticsGrid" class="grid gap-5"></div>
       `;
-      
+
       const grid = document.getElementById('analyticsGrid');
-      
+
       if (analytics.length === 0) {
         grid.innerHTML = `
           <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
@@ -426,7 +486,7 @@
         grid.innerHTML = analytics.map(session => `
           <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div class="flex justify-between items-start mb-4">
-              <h3 class="font-bold text-xl">${session.project_name}</h3>
+              <h3 class="font-bold text-xl">${escapeHtml(session.project_name)}</h3>
               <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Tracking Active</span>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
@@ -440,30 +500,17 @@
               </div>
             </div>
             <div class="text-sm text-gray-500">
-              <i class="fas fa-link"></i> Tracking URL: <code class="text-xs break-all">${session.tracking_url}</code>
+              <i class="fas fa-link"></i> Tracking URL: <code class="text-xs break-all">${session.tracking_url || 'Not configured'}</code>
             </div>
-            ${session.recent_visits && session.recent_visits.length > 0 ? `
-              <div class="mt-4 pt-4 border-t border-gray-200">
-                <p class="text-sm font-semibold mb-2">Recent Activity</p>
-                <div class="space-y-2 max-h-48 overflow-y-auto">
-                  ${session.recent_visits.slice(-5).map(visit => `
-                    <div class="text-xs text-gray-600 flex justify-between">
-                      <span>${new Date(visit.timestamp).toLocaleString()}</span>
-                      <span>${visit.referrer || 'direct'}</span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
           </div>
         `).join('');
       }
     }
-    
+
     async function renderProfile() {
       const container = document.getElementById('dashboardContent');
       const user = currentUser;
-      
+
       container.innerHTML = `
         <h1 class="text-3xl font-bold mb-6">👤 Profile Settings</h1>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-2xl">
@@ -483,17 +530,17 @@
           
           <div class="mb-4">
             <label class="block text-sm font-medium mb-1">Bio / Description</label>
-            <textarea id="userBio" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-xl">${user?.description || ''}</textarea>
+            <textarea id="userBio" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-xl">${escapeHtml(user?.description || '')}</textarea>
           </div>
           
           <button id="saveProfileBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl transition">Save Profile Changes</button>
         </div>
       `;
-      
+
       document.getElementById('saveProfileBtn').onclick = async () => {
         const newIcon = document.getElementById('iconUrl').value;
         const newBio = document.getElementById('userBio').value;
-        
+
         if (newIcon !== currentUser.icon) {
           await updateProfile('icon', newIcon);
           currentUser.icon = newIcon;
@@ -502,44 +549,55 @@
           await updateProfile('description', newBio);
           currentUser.description = newBio;
         }
-        
+
         showToast('Profile updated successfully');
         renderProfile();
       };
     }
-    
+
     async function switchTab(tab) {
       activeTab = tab;
       document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
       });
       document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-      
+
       if (tab === 'projects') await renderProjects();
       else if (tab === 'portfolio') await renderPortfolio();
       else if (tab === 'analytics') await renderAnalytics();
       else if (tab === 'profile') await renderProfile();
     }
-    
+
     async function init() {
+      // Check for auth data
+      const token = getAuthToken();
+      const userTag = localStorage.getItem('exploits_user_tag');
+      const userId = localStorage.getItem('exploits_user_id');
+      
+      if (!token || !userTag || !userId) {
+        console.log('No auth data found, redirecting to login');
+        window.location.href = '/login';
+        return;
+      }
+
       await loadUserProfile();
       if (!currentUser) {
         window.location.href = '/login';
         return;
       }
-      
+
       document.querySelectorAll('[data-tab]').forEach(item => {
         item.onclick = () => switchTab(item.dataset.tab);
       });
-      
+
       document.getElementById('logoutBtn').onclick = () => {
         localStorage.clear();
         window.location.href = '/login';
       };
-      
+
       await switchTab('projects');
     }
-    
+
     init();
   </script>
 </body>
