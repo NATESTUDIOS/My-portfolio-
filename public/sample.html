@@ -143,16 +143,6 @@
         width: 100%;
       }
     }
-
-    /* Profile Form Styles */
-    .profile-input {
-      transition: all 0.2s ease;
-    }
-    .profile-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    }
   </style>
 </head>
 <body class="custom-scrollbar relative">
@@ -320,6 +310,7 @@
       }
     }
 
+    // PROJECT MANAGEMENT FUNCTIONS
     async function renderProjects() {
       const container = document.getElementById('dashboardContent');
       container.innerHTML = `
@@ -339,7 +330,8 @@
       const response = await fetchWithAuth(`${API_BASE}/projects?action=list`);
       if (!response) return;
       
-      const { projects = [] } = await response.json();
+      const data = await response.json();
+      const projects = data.projects || [];
       const grid = document.getElementById('projectsGrid');
 
       if (projects.length === 0) {
@@ -366,6 +358,7 @@
               </div>
               <div class="absolute top-2 left-2 md:top-3 md:left-3 flex gap-2">
                 <span class="px-2 py-0.5 md:px-3 md:py-1 bg-white/90 backdrop-blur shadow-sm rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-slate-700">${proj.type}</span>
+                ${proj.analytics_enabled ? '<span class="px-2 py-0.5 md:px-3 md:py-1 bg-emerald-500/90 backdrop-blur shadow-sm rounded-full text-[8px] md:text-[10px] font-bold text-white"><i class="fas fa-chart-line mr-1"></i>Analytics</span>' : ''}
               </div>
             </div>
             <h3 class="font-bold text-base md:text-lg text-slate-900 mb-0.5 md:mb-1 px-0.5 md:px-1 truncate">${escapeHtml(proj.name)}</h3>
@@ -373,7 +366,7 @@
             
             <div class="flex items-center justify-between pt-3 md:pt-4 border-t border-slate-100 px-0.5 md:px-1">
                <span class="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[11px] font-bold text-slate-400">
-                  <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${proj.visibility === 'public' ? 'bg-emerald-400' : 'bg-amber-400'}"></span>
+                  <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${proj.visibility === 'public' ? 'bg-emerald-400' : proj.visibility === 'private' ? 'bg-amber-400' : 'bg-purple-400'}"></span>
                   ${proj.visibility.toUpperCase()}
                </span>
                <button data-slug="${proj.slug}" class="deleteProjectBtn text-slate-300 hover:text-red-500 transition-colors text-xs md:text-sm">
@@ -387,11 +380,16 @@
       document.getElementById('newProjectBtn').onclick = () => openProjectModal();
       document.querySelectorAll('.editProjectBtn').forEach(btn => btn.onclick = () => openProjectModal(btn.dataset.slug));
       document.querySelectorAll('.deleteProjectBtn').forEach(btn => btn.onclick = async () => {
-          if (confirm('Permanently delete this project?')) {
-              const response = await fetchWithAuth(`${API_BASE}/projects?action=delete`, { method: 'DELETE', body: JSON.stringify({ project_slug: btn.dataset.slug }) });
-              if (response) {
-                showToast('Project removed'); 
+          if (confirm('Permanently delete this project? This action cannot be undone.')) {
+              const response = await fetchWithAuth(`${API_BASE}/projects?action=delete`, { 
+                method: 'DELETE', 
+                body: JSON.stringify({ project_slug: btn.dataset.slug }) 
+              });
+              if (response && response.ok) {
+                showToast('Project deleted successfully'); 
                 renderProjects();
+              } else {
+                showToast('Failed to delete project', true);
               }
           }
       });
@@ -403,7 +401,8 @@
       if (slug) {
         const res = await fetchWithAuth(`${API_BASE}/projects?action=list`);
         if (res) {
-          const { projects } = await res.json();
+          const data = await res.json();
+          const projects = data.projects || [];
           project = projects.find(p => p.slug === slug);
         }
       }
@@ -418,7 +417,7 @@
             
             <div class="grid grid-cols-1 gap-4 md:gap-6">
               <div class="space-y-1 md:space-y-2">
-                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Name</label>
+                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Name *</label>
                 <input id="projName" type="text" placeholder="e.g. My Portfolio" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base" value="${escapeHtml(project?.name || '')}">
               </div>
 
@@ -427,32 +426,47 @@
                 <textarea id="projDesc" placeholder="What is this project about?" rows="3" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">${escapeHtml(project?.description || '')}</textarea>
               </div>
 
+              <div class="space-y-1 md:space-y-2">
+                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Image URL</label>
+                <input id="projImage" type="text" placeholder="https://example.com/image.jpg" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base" value="${escapeHtml(project?.image || 'https://picsum.photos/400/300')}">
+                <p class="text-xs text-slate-400 ml-1">Enter a URL for your project thumbnail</p>
+              </div>
+
               <div class="grid grid-cols-2 gap-3 md:gap-4">
                   <div class="space-y-1 md:space-y-2">
-                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Type</label>
+                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Type *</label>
                     <select id="projType" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">
-                        <option value="image" ${project?.type === 'image' ? 'selected' : ''}>Image/Gallery</option>
-                        <option value="hosted" ${project?.type === 'hosted' ? 'selected' : ''}>Hosted Web Page</option>
-                        <option value="link" ${project?.type === 'link' ? 'selected' : ''}>External Redirect</option>
+                        <option value="image" ${project?.type === 'image' ? 'selected' : ''}>📸 Image/Gallery</option>
+                        <option value="hosted" ${project?.type === 'hosted' ? 'selected' : ''}>💻 Hosted Web Page</option>
+                        <option value="link" ${project?.type === 'link' ? 'selected' : ''}>🔗 External Redirect</option>
                     </select>
                   </div>
                   <div class="space-y-1 md:space-y-2">
-                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Visibility</label>
+                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Visibility *</label>
                     <select id="projVisibility" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">
                         <option value="public" ${project?.visibility === 'public' ? 'selected' : ''}>🌍 Public</option>
                         <option value="private" ${project?.visibility === 'private' ? 'selected' : ''}>🔒 Private</option>
+                        <option value="test" ${project?.visibility === 'test' ? 'selected' : ''}>🧪 Test</option>
                     </select>
                   </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="projAnalytics" ${project?.analytics_enabled ? 'checked' : ''} class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm font-medium text-slate-700">Enable Analytics Tracking</span>
+                </label>
               </div>
 
               <div id="hostedContentDiv" class="${project?.type === 'hosted' ? '' : 'hidden'} space-y-1 md:space-y-2">
                 <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">HTML/Source Code</label>
-                <textarea id="projContent" rows="6" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">${escapeHtml(project?.content || '<div>Hello World</div>')}</textarea>
+                <textarea id="projContent" rows="8" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="<div>Your HTML content here</div>">${escapeHtml(project?.content || '<div style="padding: 40px; text-align: center;"><h1>✨ My Project</h1><p>Welcome to my hosted project on Exploits!</p></div>')}</textarea>
+                <p class="text-xs text-slate-400 ml-1">Full HTML/CSS/JS supported. Your code will be sanitized for security.</p>
               </div>
             </div>
 
             <button id="saveProjectBtn" class="w-full btn-primary text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-bold mt-6 md:mt-10 shadow-lg text-sm md:text-base">
-                ${project ? 'Update Changes' : 'Launch Project'}
+                ${project ? 'Update Changes' : 'Create Project'}
             </button>
           </div>
         </div>
@@ -463,24 +477,60 @@
       const typeSelect = document.getElementById('projType');
       const hostedDiv = document.getElementById('hostedContentDiv');
 
-      typeSelect.onchange = () => hostedDiv.classList.toggle('hidden', typeSelect.value !== 'hosted');
+      typeSelect.onchange = () => {
+        hostedDiv.classList.toggle('hidden', typeSelect.value !== 'hosted');
+      };
 
       document.getElementById('saveProjectBtn').onclick = async () => {
+        const name = document.getElementById('projName').value.trim();
+        if (!name) {
+          showToast('Project name is required', true);
+          return;
+        }
+
         const projectData = {
-          name: document.getElementById('projName').value,
+          name: name,
           description: document.getElementById('projDesc').value,
+          image: document.getElementById('projImage').value || 'https://picsum.photos/400/300',
           type: typeSelect.value,
           visibility: document.getElementById('projVisibility').value,
-          content: document.getElementById('projContent').value
+          analytics: document.getElementById('projAnalytics').checked,
+          content: typeSelect.value === 'hosted' ? document.getElementById('projContent').value : null
         };
 
+        let response;
         if (project) {
-          const response = await fetchWithAuth(`${API_BASE}/projects?action=edit`, { method: 'POST', body: JSON.stringify({ project_slug: project.slug, field: 'name', value: projectData.name }) });
-          if (response) showToast('Updated successfully');
+          // Update each field individually
+          for (const [field, value] of Object.entries(projectData)) {
+            if (value !== project[field] && field !== 'analytics') {
+              await fetchWithAuth(`${API_BASE}/projects?action=edit`, { 
+                method: 'POST', 
+                body: JSON.stringify({ project_slug: project.slug, field, value })
+              });
+            }
+          }
+          // Handle analytics separately
+          if (projectData.analytics !== project.analytics_enabled) {
+            await fetchWithAuth(`${API_BASE}/projects?action=edit`, { 
+              method: 'POST', 
+              body: JSON.stringify({ project_slug: project.slug, field: 'analytics_enabled', value: projectData.analytics })
+            });
+          }
+          showToast('Project updated successfully');
         } else {
-          const response = await fetchWithAuth(`${API_BASE}/projects?action=create`, { method: 'POST', body: JSON.stringify(projectData) });
-          if (response) showToast('Project Created');
+          response = await fetchWithAuth(`${API_BASE}/projects?action=create`, { 
+            method: 'POST', 
+            body: JSON.stringify(projectData) 
+          });
+          if (response && response.ok) {
+            showToast('Project created successfully');
+          } else {
+            const error = await response?.json();
+            showToast(error?.error || 'Failed to create project', true);
+            return;
+          }
         }
+        
         modal.remove(); 
         renderProjects();
       };
@@ -493,7 +543,7 @@
       const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { method: 'POST', body: JSON.stringify({ subaction: 'get' }) });
       if (!response) return;
       
-      const { portfolio = { type: 'none' } } = await response.json();
+      const { portfolio = { type: 'none', content: null, redirect_url: null } } = await response.json();
 
       container.innerHTML = `
         <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-6 md:mb-10">Portfolio Settings</h1>
@@ -501,15 +551,15 @@
           <div class="mb-6 md:mb-10">
             <label class="block text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-3">Portfolio Display Mode</label>
             <div class="grid grid-cols-3 gap-2 md:gap-4">
-                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'none' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('none')">
+                <div data-mode="none" class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'none' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}">
                     <i class="fas fa-file-code mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
                     <p class="text-[10px] md:text-xs font-bold">API Only</p>
                 </div>
-                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'hosted' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('hosted')">
+                <div data-mode="hosted" class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'hosted' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}">
                     <i class="fas fa-window-maximize mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
                     <p class="text-[10px] md:text-xs font-bold">Hosted Site</p>
                 </div>
-                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'redirect' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('redirect')">
+                <div data-mode="redirect" class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'redirect' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}">
                     <i class="fas fa-route mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
                     <p class="text-[10px] md:text-xs font-bold">Redirect</p>
                 </div>
@@ -518,38 +568,123 @@
           
           <div id="hostedArea" class="${portfolio.type === 'hosted' ? '' : 'hidden'} mb-6 md:mb-10">
             <label class="block text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-3">Custom HTML Portfolio</label>
-            <textarea id="hostedContent" rows="12" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">${escapeHtml(portfolio.content || '<h1>My Site</h1>')}</textarea>
+            <textarea id="hostedContent" rows="12" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">${escapeHtml(portfolio.content || '<div style="text-align:center;padding:40px"><h1>Welcome to my portfolio</h1><p>Built with Exploits</p></div>')}</textarea>
+            <p class="text-xs text-slate-400 mt-2">Full HTML/CSS/JS supported. Your code will be sanitized for security.</p>
+          </div>
+          
+          <div id="redirectArea" class="${portfolio.type === 'redirect' ? '' : 'hidden'} mb-6 md:mb-10">
+            <label class="block text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-3">Redirect URL</label>
+            <input id="redirectUrl" type="url" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none" value="${escapeHtml(portfolio.redirect_url || '')}" placeholder="https://example.com">
           </div>
 
-          <button id="savePortfolioBtn" class="btn-primary text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-base">Update Portfolio</button>
+          <button id="savePortfolioBtn" class="btn-primary text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-base">Save Portfolio Settings</button>
+          
+          <div class="mt-6 pt-6 border-t border-slate-100">
+            <p class="text-sm text-slate-600">Your portfolio is live at:</p>
+            <a href="${currentUser?.portfolio_url || '#'}" target="_blank" class="text-indigo-600 hover:underline break-all text-sm">${currentUser?.portfolio_url || 'Configure your portfolio URL'}</a>
+          </div>
         </div>
       `;
       
       // Attach event listeners after rendering
       setTimeout(() => {
-        window.setPortfolioType = async (type) => {
-          const content = type === 'hosted' ? document.getElementById('hostedContent')?.value : null;
-          const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { 
-            method: 'POST', 
-            body: JSON.stringify({ subaction: 'update', portfolio_type: type, portfolio_content: content })
-          });
-          if (response) {
-            showToast('Portfolio mode updated');
-            renderPortfolio();
-          }
-        };
+        // Mode selection
+        document.querySelectorAll('.mode-card').forEach(card => {
+          card.onclick = () => {
+            document.querySelectorAll('.mode-card').forEach(c => {
+              c.classList.remove('border-indigo-500', 'bg-indigo-50/50');
+              c.classList.add('border-slate-100');
+            });
+            card.classList.remove('border-slate-100');
+            card.classList.add('border-indigo-500', 'bg-indigo-50/50');
+            
+            const mode = card.dataset.mode;
+            const hostedArea = document.getElementById('hostedArea');
+            const redirectArea = document.getElementById('redirectArea');
+            
+            if (mode === 'hosted') {
+              hostedArea.classList.remove('hidden');
+              redirectArea.classList.add('hidden');
+            } else if (mode === 'redirect') {
+              hostedArea.classList.add('hidden');
+              redirectArea.classList.remove('hidden');
+            } else {
+              hostedArea.classList.add('hidden');
+              redirectArea.classList.add('hidden');
+            }
+          };
+        });
         
         document.getElementById('savePortfolioBtn').onclick = async () => {
-          const selectedType = document.querySelector('.mode-card.border-indigo-500')?.innerText.toLowerCase().includes('hosted') ? 'hosted' : 
-                              document.querySelector('.mode-card.border-indigo-500')?.innerText.toLowerCase().includes('redirect') ? 'redirect' : 'none';
-          const content = document.getElementById('hostedContent')?.value;
+          const activeMode = document.querySelector('.mode-card.border-indigo-500');
+          const mode = activeMode?.dataset.mode || 'none';
+          const content = mode === 'hosted' ? document.getElementById('hostedContent').value : null;
+          const redirectUrl = mode === 'redirect' ? document.getElementById('redirectUrl').value : null;
+          
           const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { 
             method: 'POST', 
-            body: JSON.stringify({ subaction: 'update', portfolio_type: selectedType, portfolio_content: content })
+            body: JSON.stringify({ 
+              subaction: 'update', 
+              portfolio_type: mode,
+              portfolio_content: content,
+              portfolio_redirect: redirectUrl
+            })
           });
-          if (response) showToast('Portfolio updated');
+          if (response && response.ok) {
+            showToast('Portfolio updated successfully');
+            renderPortfolio();
+          } else {
+            showToast('Failed to update portfolio', true);
+          }
         };
       }, 100);
+    }
+
+    async function renderAnalytics() {
+      const container = document.getElementById('dashboardContent');
+      const response = await fetchWithAuth(`${API_BASE}/analytics?action=list`);
+      if (!response) return;
+      
+      const data = await response.json();
+      const sessions = data.sessions || [];
+      
+      if (sessions.length === 0) {
+        container.innerHTML = `
+          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics Dashboard</h1>
+          <div class="py-12 md:py-20 text-center glass-card rounded-2xl md:rounded-[2.5rem]">
+            <i class="fas fa-chart-line text-3xl md:text-4xl text-slate-200 mb-3 md:mb-4"></i>
+            <p class="text-slate-500 font-medium text-sm md:text-base">No analytics data yet. Enable analytics on your projects to start tracking visits.</p>
+            <button onclick="switchTab('projects')" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium text-sm">Go to Projects →</button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics Dashboard</h1>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            ${sessions.map(session => `
+              <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                  <h3 class="font-bold text-lg">${escapeHtml(session.project_name)}</h3>
+                  <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">Active</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                  <div class="bg-slate-50 rounded-xl p-3">
+                    <p class="text-slate-500 text-xs">Total Visits</p>
+                    <p class="text-2xl font-bold text-slate-900">${session.total_visits || 0}</p>
+                  </div>
+                  <div class="bg-slate-50 rounded-xl p-3">
+                    <p class="text-slate-500 text-xs">Unique Visitors</p>
+                    <p class="text-2xl font-bold text-slate-900">${session.unique_visitors || 0}</p>
+                  </div>
+                </div>
+                <div class="text-xs text-slate-500 pt-3 border-t border-slate-100">
+                  <i class="fas fa-link mr-1"></i> Tracking URL: <code class="text-xs break-all bg-slate-50 px-2 py-1 rounded">${session.tracking_url || 'Not configured'}</code>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
     }
 
     async function renderProfile() {
@@ -591,14 +726,14 @@
           <div class="space-y-6">
             <div>
               <label class="block text-sm font-bold text-slate-700 mb-2">Profile Icon URL</label>
-              <input type="text" id="iconUrl" class="profile-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 transition" 
+              <input type="text" id="iconUrl" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition outline-none" 
                      value="${escapeHtml(userData?.icon || '')}" placeholder="https://example.com/avatar.jpg">
               <p class="text-xs text-slate-400 mt-1">Enter a direct image URL for your profile picture</p>
             </div>
             
             <div>
               <label class="block text-sm font-bold text-slate-700 mb-2">Bio / Description</label>
-              <textarea id="userBio" rows="4" class="profile-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 transition" 
+              <textarea id="userBio" rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition outline-none" 
                         placeholder="Tell the world about yourself...">${escapeHtml(userData?.description || '')}</textarea>
               <p class="text-xs text-slate-400 mt-1">Share your story, skills, and what you create</p>
             </div>
@@ -622,7 +757,7 @@
             method: 'POST',
             body: JSON.stringify({ field: 'icon', value: newIcon })
           });
-          if (response) {
+          if (response && response.ok) {
             if (currentUser) currentUser.icon = newIcon;
           } else {
             success = false;
@@ -634,7 +769,7 @@
             method: 'POST',
             body: JSON.stringify({ field: 'description', value: newBio })
           });
-          if (response) {
+          if (response && response.ok) {
             if (currentUser) currentUser.description = newBio;
           } else {
             success = false;
@@ -643,9 +778,10 @@
         
         if (success) {
           showToast('Profile updated successfully');
-          // Update avatar in sidebar
           if (newIcon) document.querySelector('#miniAvatar img').src = newIcon;
-          renderProfile(); // Refresh to show updated values
+          renderProfile();
+        } else {
+          showToast('Failed to update profile', true);
         }
       };
       
@@ -654,49 +790,6 @@
         iconInput.focus();
         showToast('Enter a new image URL above');
       };
-    }
-
-    async function renderAnalytics() {
-      const container = document.getElementById('dashboardContent');
-      const response = await fetchWithAuth(`${API_BASE}/analytics?action=list`);
-      const { sessions = [] } = response ? await response.json() : { sessions: [] };
-      
-      if (sessions.length === 0) {
-        container.innerHTML = `
-          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics</h1>
-          <div class="py-12 md:py-20 text-center glass-card rounded-2xl md:rounded-[2.5rem]">
-            <i class="fas fa-chart-line text-3xl md:text-4xl text-slate-200 mb-3 md:mb-4"></i>
-            <p class="text-slate-500 font-medium text-sm md:text-base">No analytics data yet. Enable analytics on your projects to start tracking.</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics Dashboard</h1>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            ${sessions.map(session => `
-              <div class="glass-card rounded-2xl p-6">
-                <div class="flex justify-between items-start mb-4">
-                  <h3 class="font-bold text-lg">${escapeHtml(session.project_name)}</h3>
-                  <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">Active</span>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p class="text-slate-500 text-xs">Total Visits</p>
-                    <p class="text-2xl font-bold text-slate-900">${session.total_visits || 0}</p>
-                  </div>
-                  <div>
-                    <p class="text-slate-500 text-xs">Unique Visitors</p>
-                    <p class="text-2xl font-bold text-slate-900">${session.unique_visitors || 0}</p>
-                  </div>
-                </div>
-                <div class="text-xs text-slate-500">
-                  <i class="fas fa-link mr-1"></i> Tracking URL: <code class="break-all">${session.tracking_url || 'Not configured'}</code>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
     }
 
     async function switchTab(tab) {
