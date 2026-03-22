@@ -32,19 +32,19 @@
     },
     {
       "src": "^/$",
-      "dest": "/Public/index.html"
+      "dest": "/public/index.html"
     },
     {
       "src": "^/([^/]+)/$",
-      "dest": "/Public/$1/index.html"
+      "dest": "/public/$1/index.html"
     },
     {
       "src": "^/([^/]+)$",
-      "dest": "/Public/$1.html"
+      "dest": "/public/$1.html"
     },
     {
       "src": "^/(.*)$",
-      "dest": "/Public/$1"
+      "dest": "/public/$1"
 }
   ],
   "headers": [
