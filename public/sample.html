@@ -2,594 +2,292 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio - Exploits</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     
-    * {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    :root {
+      --primary: #6366f1;
+      --secondary: #a855f7;
     }
-    
+
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #0f172a;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
       min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
+      color: #f8fafc;
     }
-    
-    /* Animated background particles */
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    
-    .particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      animation: float 20s infinite linear;
-    }
-    
-    @keyframes float {
-      0% {
-        transform: translateY(100vh) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.5;
-      }
-      90% {
-        opacity: 0.5;
-      }
-      100% {
-        transform: translateY(-100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-    
-    /* Glass morphism card */
+
     .glass-card {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
     }
-    
+
     .glass-card-light {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
-    /* Project card animations */
+
     .project-card {
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-origin: center;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    
+
     .project-card:hover {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.3);
+      transform: translateY(-10px) scale(1.02);
+      border-color: rgba(99, 102, 241, 0.4);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
     }
-    
-    .project-card:hover .project-overlay {
-      opacity: 1;
-    }
-    
-    .project-overlay {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-    }
-    
-    /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    
-    /* Skill tags */
-    .skill-tag {
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       transition: all 0.3s ease;
-      cursor: default;
     }
-    
-    .skill-tag:hover {
-      transform: translateY(-2px);
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
     }
-    
-    /* Glow effect */
-    .glow {
-      animation: glow 2s ease-in-out infinite;
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    
-    @keyframes glow {
-      0%, 100% {
-        box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
-      }
-      50% {
-        box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
-      }
+
+    .animate-up {
+      animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
-    
-    /* Scroll animations */
-    .scroll-reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.6s ease;
-    }
-    
-    .scroll-reveal.revealed {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-radius: 4px;
-    }
-    
-    /* Loading spinner */
-    .loader {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    /* Smooth scroll behavior */
-    html {
-      scroll-behavior: smooth;
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    .filter-btn.active {
+      background: white;
+      color: #0f172a;
     }
   </style>
 </head>
-<body class="antialiased">
-  <!-- Animated Background Particles -->
-  <div class="particles" id="particles"></div>
-  
-  <div id="app" class="relative z-10 min-h-screen">
-    <!-- Loading State -->
+<body>
+  <div id="app" class="min-h-screen">
+    <!-- Sophisticated Loading State -->
     <div class="flex items-center justify-center min-h-screen">
-      <div class="text-center">
-        <div class="loader mx-auto mb-4"></div>
-        <p class="text-white text-lg font-medium">Loading creative portfolio...</p>
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+        <div class="mt-4 text-indigo-300 font-medium tracking-wide animate-pulse">Loading experience...</div>
       </div>
     </div>
   </div>
 
   <script>
     const API_BASE = 'https://myexploits.vercel.app/api';
-    
-    // Create animated particles
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      const particleCount = 50;
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        const size = Math.random() * 4 + 2;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
-        particle.style.animationDelay = `${Math.random() * 10}s`;
-        particlesContainer.appendChild(particle);
-      }
-    }
-    
-    // Get user_slug from URL
+
     function getUserSlug() {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('user_slug');
     }
-    
-    // Fetch user profile data
+
     async function fetchUserData(userSlug) {
-      try {
-        const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
-        if (!response.ok) {
-          if (response.status === 404) throw new Error('User not found');
-          throw new Error('Failed to fetch user data');
-        }
-        return await response.json();
-      } catch (error) {
-        throw error;
-      }
+      const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
+      if (!response.ok) throw new Error(response.status === 404 ? 'User not found' : 'Fetch error');
+      return await response.json();
     }
-    
-    // Fetch user's public projects
+
     async function fetchUserProjects(userSlug) {
       try {
         const response = await fetch(`${API_BASE}/projects?action=public&user_tag=${userSlug}`);
-        if (!response.ok) return [];
         const data = await response.json();
         return data.projects || [];
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        return [];
-      }
+      } catch (e) { return []; }
     }
-    
-    // Escape HTML
+
+    function renderError(message) {
+      document.getElementById('app').innerHTML = `
+        <div class="flex items-center justify-center min-h-screen p-6">
+          <div class="glass-card max-w-md w-full p-10 text-center animate-up">
+            <div class="text-6xl mb-6">orbit</div>
+            <h2 class="text-3xl font-bold mb-4">Space Unknown</h2>
+            <p class="text-slate-400 mb-8">${escapeHtml(message)}</p>
+            <a href="/" class="btn-primary block w-full py-4 rounded-2xl font-bold">Return to Base</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPortfolioFromJSON(user, projects) {
+      const app = document.getElementById('app');
+      const totalProjects = projects.length;
+      const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently';
+
+      app.innerHTML = `
+        <div class="max-w-6xl mx-auto px-6 py-12">
+          
+          <!-- Hero Section -->
+          <header class="glass-card p-8 md:p-12 mb-12 animate-up relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                <i class="fas fa-terminal text-9xl"></i>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center gap-10">
+              <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                <img src="${user.icon || ''}" 
+                     class="relative w-32 h-32 md:w-44 md:h-44 rounded-full object-cover border-2 border-white/10 shadow-2xl"
+                     onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=6366f1&color=fff&size=200&bold=true'">
+              </div>
+              
+              <div class="flex-1 text-center md:text-left">
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
+                  <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">${escapeHtml(user.user_tag)}</h1>
+                  <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-widest">Verified Creator</span>
+                </div>
+                
+                <p class="text-slate-400 text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
+                  ${escapeHtml(user.description || 'Crafting digital solutions and exploring the boundaries of modern web development.')}
+                </p>
+                
+                <div class="grid grid-cols-2 md:flex flex-wrap gap-4">
+                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3">
+                    <i class="fas fa-calendar-alt text-indigo-400"></i>
+                    <span class="text-sm font-medium">Joined ${joinDate}</span>
+                  </div>
+                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3">
+                    <i class="fas fa-layer-group text-purple-400"></i>
+                    <span class="text-sm font-medium">${totalProjects} Creations</span>
+                  </div>
+                  <button onclick="copyUrl()" class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-3 hover:bg-white/10 transition">
+                    <i class="fas fa-link text-emerald-400"></i>
+                    <span class="text-sm font-medium">Copy Profile</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <!-- Projects Section -->
+          <section class="animate-up" style="animation-delay: 0.2s">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+              <h2 class="text-3xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-indigo-500 rounded-full"></span>
+                Featured Work
+              </h2>
+              
+              <div class="flex gap-2 p-1 glass-card-light rounded-xl overflow-x-auto w-full md:w-auto">
+                <button onclick="filterProjects('all')" class="filter-btn active px-5 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap">All Work</button>
+                <button onclick="filterProjects('hosted')" class="filter-btn px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition whitespace-nowrap">Hosted</button>
+                <button onclick="filterProjects('link')" class="filter-btn px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition whitespace-nowrap">External</button>
+              </div>
+            </div>
+            
+            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              ${totalProjects > 0 ? projects.map((project, index) => `
+                <div class="project-card glass-card flex flex-col h-full group" data-type="${project.type}">
+                  <div class="relative aspect-video overflow-hidden rounded-t-2xl">
+                    <img src="${project.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-60"></div>
+                    <div class="absolute bottom-4 left-4">
+                       <span class="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">
+                        ${project.type}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="p-6 flex flex-col flex-1">
+                    <h3 class="text-xl font-bold mb-3 group-hover:text-indigo-400 transition">${escapeHtml(project.name)}</h3>
+                    <p class="text-slate-400 text-sm line-clamp-3 mb-6 leading-relaxed flex-1">
+                      ${escapeHtml(project.description || 'No detailed description provided for this project.')}
+                    </p>
+                    
+                    <button onclick="viewProject('${project.user_id}', '${project.slug}')" 
+                       class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-bold text-sm hover:bg-white hover:text-slate-900 transition-all duration-300 flex items-center justify-center gap-2">
+                      Explore Project <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('') : `
+                <div class="col-span-full py-20 text-center glass-card">
+                  <i class="fas fa-rocket-launch text-5xl text-slate-700 mb-4"></i>
+                  <h3 class="text-xl font-bold">The lab is quiet...</h3>
+                  <p class="text-slate-500">No public projects available at the moment.</p>
+                </div>
+              `}
+            </div>
+          </section>
+
+          <!-- Footer -->
+          <footer class="mt-24 pt-12 border-t border-white/5 text-center text-slate-500 animate-up" style="animation-delay: 0.4s">
+            <p class="mb-4">Designed with excellence via <span class="text-white font-bold">Exploits</span></p>
+            <div class="flex justify-center gap-6 text-sm">
+              <a href="/" class="hover:text-indigo-400 transition">Network</a>
+              <a href="/login" class="hover:text-indigo-400 transition">Create</a>
+              <a href="/docs" class="hover:text-indigo-400 transition">Docs</a>
+            </div>
+          </footer>
+        </div>
+      `;
+    }
+
+    // Helper functions
+    window.filterProjects = function(type) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-white', 'text-slate-900');
+        btn.classList.add('text-slate-400');
+        if (btn.textContent.toLowerCase().includes(type) || (type === 'all' && btn.textContent.includes('All'))) {
+          btn.classList.add('active', 'bg-white', 'text-slate-900');
+          btn.classList.remove('text-slate-400');
+        }
+      });
+      
+      document.querySelectorAll('.project-card').forEach(card => {
+        card.style.display = (type === 'all' || card.dataset.type === type) ? 'flex' : 'none';
+      });
+    };
+
+    window.viewProject = function(userId, projectSlug) {
+      window.location.href = `/project/${userId}/${projectSlug}`;
+    };
+
+    window.copyUrl = function() {
+      navigator.clipboard.writeText(window.location.href);
+      const btn = event.currentTarget;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check text-emerald-400"></i><span class="text-sm font-medium">Copied!</span>';
+      setTimeout(() => btn.innerHTML = original, 2000);
+    };
+
     function escapeHtml(text) {
       if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
-    
-    // Copy URL to clipboard
-    window.copyUrl = function() {
-      const url = window.location.href;
-      navigator.clipboard.writeText(url).then(() => {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50 animate-bounce';
-        tooltip.innerHTML = '<i class="fas fa-check mr-2"></i>URL copied!';
-        document.body.appendChild(tooltip);
-        setTimeout(() => tooltip.remove(), 2000);
-      });
-    };
-    
-    // View project detail
-    window.viewProject = function(userId, projectSlug) {
-      window.location.href = `/project/${userId}/${projectSlug}`;
-    };
-    
-    // Filter projects
-    window.filterProjects = function(type) {
-      const projects = document.querySelectorAll('.project-card');
-      const buttons = document.querySelectorAll('.filter-btn');
-      
-      buttons.forEach(btn => {
-        btn.classList.remove('active', 'bg-white/20', 'text-white', 'shadow-lg');
-        btn.classList.add('bg-white/10', 'text-white/80');
-        if (btn.getAttribute('data-type') === type) {
-          btn.classList.add('active', 'bg-white/20', 'text-white', 'shadow-lg');
-          btn.classList.remove('bg-white/10', 'text-white/80');
-        }
-      });
-      
-      projects.forEach(project => {
-        if (type === 'all' || project.dataset.type === type) {
-          project.style.display = 'block';
-          setTimeout(() => {
-            project.style.opacity = '1';
-            project.style.transform = 'translateY(0)';
-          }, 50);
-        } else {
-          project.style.opacity = '0';
-          project.style.transform = 'translateY(20px)';
-          setTimeout(() => {
-            project.style.display = 'none';
-          }, 300);
-        }
-      });
-    };
-    
-    // Render error state
-    function renderError(message, userSlug) {
-      const app = document.getElementById('app');
-      app.innerHTML = `
-        <div class="flex items-center justify-center min-h-screen p-6">
-          <div class="glass-card rounded-3xl max-w-lg w-full p-10 text-center transform transition-all">
-            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <i class="fas fa-sad-tear text-white text-4xl"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-3">Portfolio Not Found</h2>
-            <p class="text-gray-600 mb-6">${escapeHtml(message)}</p>
-            <div class="space-y-3">
-              <a href="/" class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105">
-                <i class="fas fa-home mr-2"></i> Return Home
-              </a>
-              <a href="/login" class="block w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all">
-                <i class="fas fa-rocket mr-2"></i> Create Your Portfolio
-              </a>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // Render hosted portfolio
-    async function renderHostedPortfolio(userTag) {
-      try {
-        const response = await fetch(`${API_BASE}/auth?user_tag=${userTag}`);
-        if (response.ok) {
-          const html = await response.text();
-          document.getElementById('app').innerHTML = html;
-          return true;
-        }
-      } catch (error) {
-        console.error('Error loading hosted portfolio:', error);
-      }
-      return false;
-    }
-    
-    // Render beautiful minimal portfolio
-    function renderMinimalProfile(user, projects) {
-      const app = document.getElementById('app');
-      const totalProjects = projects.length;
-      const hostedProjects = projects.filter(p => p.type === 'hosted').length;
-      const featuredProjects = projects.slice(0, 6);
-      
-      app.innerHTML = `
-        <!-- Hero Section with Floating Elements -->
-        <div class="relative overflow-hidden">
-          <!-- Decorative floating elements -->
-          <div class="absolute top-20 left-10 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-          <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
-          
-          <div class="max-w-7xl mx-auto px-4 py-12 md:py-20 relative">
-            <!-- Profile Header -->
-            <div class="scroll-reveal">
-              <div class="glass-card rounded-3xl p-8 md:p-12 mb-12 shadow-2xl">
-                <div class="flex flex-col lg:flex-row items-center gap-12">
-                  <!-- Avatar with glow effect -->
-                  <div class="relative">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-xl opacity-75 animate-pulse"></div>
-                    <img src="${user.icon || 'https://picsum.photos/200/200'}" 
-                         class="relative w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-white shadow-2xl glow"
-                         onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=667eea&color=fff&size=200&bold=true'">
-                    <div class="absolute bottom-2 right-2 bg-green-500 rounded-full p-2 shadow-lg border-2 border-white">
-                      <i class="fas fa-check-circle text-white text-sm"></i>
-                    </div>
-                  </div>
-                  
-                  <!-- User Info -->
-                  <div class="flex-1 text-center lg:text-left">
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
-                      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800">${escapeHtml(user.user_tag)}</h1>
-                      <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-semibold shadow-lg">
-                        <i class="fas fa-star text-xs"></i> Verified Creator
-                      </span>
-                    </div>
-                    <p class="text-xl text-gray-600 max-w-2xl leading-relaxed mb-6">${escapeHtml(user.description || 'Creative developer & designer passionate about building amazing digital experiences that inspire and delight.')}</p>
-                    
-                    <!-- Stats Grid -->
-                    <div class="flex flex-wrap gap-6 justify-center lg:justify-start mb-6">
-                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
-                        <i class="fas fa-calendar-alt text-blue-500 text-lg"></i>
-                        <span class="text-sm text-gray-700">Joined ${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '2024'}</span>
-                      </div>
-                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
-                        <i class="fas fa-folder-open text-purple-500 text-lg"></i>
-                        <span class="text-sm text-gray-700">${totalProjects} Projects</span>
-                      </div>
-                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
-                        <i class="fas fa-code text-green-500 text-lg"></i>
-                        <span class="text-sm text-gray-700">${hostedProjects} Interactive</span>
-                      </div>
-                    </div>
-                    
-                    <!-- Portfolio URL with copy -->
-                    <div class="inline-flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 shadow-sm">
-                      <i class="fas fa-link text-gray-500 text-sm"></i>
-                      <code class="text-xs text-gray-600">myexploits.vercel.app/portfolio?user_slug=${user.user_tag}</code>
-                      <button onclick="copyUrl()" class="text-blue-500 hover:text-blue-600 ml-2 transition">
-                        <i class="fas fa-copy"></i>
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <!-- CTA Button -->
-                  <div class="lg:self-start">
-                    <a href="/login" class="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
-                      <i class="fas fa-rocket group-hover:animate-pulse"></i>
-                      <span>Create Your Portfolio</span>
-                      <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Projects Section -->
-            <div class="scroll-reveal">
-              <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-                <div>
-                  <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">
-                    <i class="fas fa-sparkle mr-3"></i>Featured Work
-                  </h2>
-                  <p class="text-white/80">Creative projects that showcase expertise and passion</p>
-                </div>
-                ${totalProjects > 0 ? `
-                  <div class="flex gap-2 bg-white/10 backdrop-blur rounded-full p-1">
-                    <button data-type="all" onclick="filterProjects('all')" class="filter-btn active px-5 py-2 rounded-full bg-white/20 text-white font-medium transition-all">
-                      All
-                    </button>
-                    <button data-type="hosted" onclick="filterProjects('hosted')" class="filter-btn px-5 py-2 rounded-full bg-white/10 text-white/80 font-medium transition-all">
-                      Hosted
-                    </button>
-                    <button data-type="link" onclick="filterProjects('link')" class="filter-btn px-5 py-2 rounded-full bg-white/10 text-white/80 font-medium transition-all">
-                      Links
-                    </button>
-                  </div>
-                ` : ''}
-              </div>
-              
-              <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                ${featuredProjects.length > 0 ? featuredProjects.map((project, index) => `
-                  <div class="project-card group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-xl transform transition-all duration-500" 
-                       data-type="${project.type}" 
-                       data-visibility="${project.visibility}"
-                       style="animation-delay: ${index * 0.1}s"
-                       onclick="viewProject('${project.user_id}', '${project.slug}')">
-                    <div class="relative overflow-hidden">
-                      <img src="${project.image}" class="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-500" 
-                           onerror="this.src='https://picsum.photos/400/300?random=${index}'">
-                      <div class="project-overlay absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button class="bg-white text-purple-600 px-6 py-3 rounded-full font-semibold shadow-xl transform hover:scale-105 transition">
-                          View Project <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                      </div>
-                      <div class="absolute top-4 right-4 flex gap-2">
-                        <span class="px-3 py-1.5 rounded-full text-xs font-bold ${project.type === 'hosted' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : project.type === 'link' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'} shadow-lg">
-                          ${project.type === 'hosted' ? '<i class="fas fa-code mr-1"></i> Hosted' : project.type === 'link' ? '<i class="fas fa-external-link-alt mr-1"></i> Link' : '<i class="fas fa-image mr-1"></i> Image'}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="p-6">
-                      <h3 class="font-bold text-xl mb-2 text-gray-800 line-clamp-1">${escapeHtml(project.name)}</h3>
-                      <p class="text-gray-600 text-sm mb-4 line-clamp-2">${escapeHtml(project.description || 'No description available.')}</p>
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-sm text-gray-500">
-                          <i class="far fa-calendar-alt"></i>
-                          <span>${new Date(project.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <span class="text-blue-600 group-hover:text-purple-600 transition text-sm font-medium">
-                          Explore <i class="fas fa-arrow-right ml-1 group-hover:translate-x-1 transition"></i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                `).join('') : `
-                  <div class="col-span-full">
-                    <div class="glass-card-light rounded-3xl p-16 text-center">
-                      <div class="w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mx-auto mb-6 shadow-xl">
-                        <i class="fas fa-palette text-white text-4xl"></i>
-                      </div>
-                      <h3 class="text-2xl font-bold text-gray-800 mb-3">No Public Projects Yet</h3>
-                      <p class="text-gray-600 mb-6 max-w-md mx-auto">This creator is crafting something amazing. Check back soon for updates!</p>
-                      <a href="/login" class="inline-flex items-center gap-2 text-blue-600 hover:text-purple-600 font-semibold transition">
-                        Create your first project <i class="fas fa-arrow-right"></i>
-                      </a>
-                    </div>
-                  </div>
-                `}
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="scroll-reveal mt-20">
-              <div class="text-center pt-8 border-t border-white/20">
-                <div class="flex flex-wrap justify-center gap-6 mb-4">
-                  <a href="/" class="text-white/80 hover:text-white transition flex items-center gap-2">
-                    <i class="fas fa-home"></i> Home
-                  </a>
-                  <a href="/login" class="text-white/80 hover:text-white transition flex items-center gap-2">
-                    <i class="fas fa-rocket"></i> Get Started
-                  </a>
-                  <a href="/docs" class="text-white/80 hover:text-white transition flex items-center gap-2">
-                    <i class="fas fa-book"></i> Documentation
-                  </a>
-                  <a href="#" class="text-white/80 hover:text-white transition flex items-center gap-2">
-                    <i class="fab fa-github"></i> GitHub
-                  </a>
-                </div>
-                <p class="text-white/60 text-sm">
-                  <i class="fas fa-bolt mr-1"></i> Powered by Exploits — The portfolio platform for developers & designers
-                </p>
-                <p class="text-white/40 text-xs mt-2">
-                  © 2024 Exploits. All rights reserved.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Trigger scroll reveal animations
-      setTimeout(() => {
-        const elements = document.querySelectorAll('.scroll-reveal');
-        elements.forEach(el => el.classList.add('revealed'));
-      }, 100);
-    }
-    
-    // Initialize portfolio
+
     async function init() {
-      createParticles();
-      
       const userSlug = getUserSlug();
-      
-      if (!userSlug) {
-        renderError('No user specified. Please provide a valid username.', null);
-        return;
-      }
+      if (!userSlug) return renderError('No astronaut found. Please check the URL.');
       
       try {
-        // Show loading with username
-        const app = document.getElementById('app');
-        app.innerHTML = `
-          <div class="flex items-center justify-center min-h-screen">
-            <div class="text-center">
-              <div class="loader mx-auto mb-4"></div>
-              <p class="text-white text-lg font-medium">Loading portfolio for @${escapeHtml(userSlug)}...</p>
-            </div>
-          </div>
-        `;
-        
-        // Fetch user data and projects
-        const [user, projects] = await Promise.all([
-          fetchUserData(userSlug),
-          fetchUserProjects(userSlug)
-        ]);
-        
-        // Check portfolio type
-        const portfolio = user.portfolio || { type: 'none' };
-        
-        if (portfolio.type === 'hosted') {
-          const success = await renderHostedPortfolio(userSlug);
-          if (!success) {
-            renderMinimalProfile(user, projects);
-          }
-        } else if (portfolio.type === 'redirect' && portfolio.redirect_url) {
-          window.location.href = portfolio.redirect_url;
-          return;
-        } else {
-          renderMinimalProfile(user, projects);
-        }
-        
-        // Update page title
-        document.title = `${user.user_tag} | Creative Portfolio - Exploits`;
-        
-        // Add meta tags
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (!metaDescription) {
-          metaDescription = document.createElement('meta');
-          metaDescription.name = 'description';
-          document.head.appendChild(metaDescription);
-        }
-        metaDescription.content = user.description || `Explore the creative portfolio of ${user.user_tag} on Exploits`;
-        
+        const user = await fetchUserData(userSlug);
+        const projects = await fetchUserProjects(userSlug);
+        renderPortfolioFromJSON(user, projects);
+        document.title = `${user.user_tag} | Profile`;
       } catch (error) {
-        console.error('Error:', error);
-        if (error.message === 'User not found') {
-          renderError(`User "${escapeHtml(userSlug)}" doesn't exist or hasn't created a portfolio yet.`, userSlug);
-        } else {
-          renderError('Unable to load portfolio. Please try again later.', userSlug);
-        }
+        renderError(error.message);
       }
     }
     
-    // Start the app
     init();
   </script>
 </body>
