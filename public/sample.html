@@ -3,455 +3,594 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  
-  <!-- Primary Meta Tags -->
-  <title>Exploits — Portfolio Hub for Developers & Designers | Host HTML Projects, Track Analytics</title>
-  <meta name="title" content="Exploits — Portfolio Hub for Developers & Designers">
-  <meta name="description" content="Build, host, and dominate your creative identity. The all-in-one portfolio suite for developers and designers. Host HTML projects, track analytics, and craft stunning profiles with zero lock-in.">
-  <meta name="keywords" content="portfolio, developer portfolio, designer portfolio, HTML hosting, project analytics, creative portfolio, web developer, freelance portfolio, code portfolio, design portfolio">
-  <meta name="author" content="Exploits">
-  <meta name="robots" content="index, follow">
-  <meta name="language" content="English">
-  <meta name="revisit-after" content="7 days">
-  
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://myexploits.vercel.app/">
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://myexploits.vercel.app/">
-  <meta property="og:title" content="Exploits — Portfolio Hub for Developers & Designers">
-  <meta property="og:description" content="Build, host, and dominate your creative identity. Host HTML projects, track analytics, and craft stunning portfolios with zero lock-in.">
-  <meta property="og:image" content="https://myexploits.vercel.app/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="Exploits">
-  
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://myexploits.vercel.app/">
-  <meta property="twitter:title" content="Exploits — Portfolio Hub for Developers & Designers">
-  <meta property="twitter:description" content="Build, host, and dominate your creative identity. Host HTML projects, track analytics, and craft stunning portfolios with zero lock-in.">
-  <meta property="twitter:image" content="https://myexploits.vercel.app/twitter-image.png">
-  
-  <!-- Additional Meta Tags -->
-  <meta name="application-name" content="Exploits">
-  <meta name="apple-mobile-web-app-title" content="Exploits">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#3B82F6">
-  
-  <!-- Favicon and Icons -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  
-  <!-- Schema.org markup for Google+ -->
-  <meta itemprop="name" content="Exploits — Portfolio Hub for Developers & Designers">
-  <meta itemprop="description" content="Build, host, and dominate your creative identity. The all-in-one portfolio suite for developers and designers.">
-  <meta itemprop="image" content="https://myexploits.vercel.app/schema-image.png">
-  
-  <!-- Tailwind + Google Fonts + CSS -->
+  <title>Portfolio - Exploits</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
-    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    body { background: #fefcf7; }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,240,0.5);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+    
+    * {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.5;
+      }
+      90% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Glass morphism card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-card-light {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Project card animations */
+    .project-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: center;
+    }
+    
+    .project-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .project-card:hover .project-overlay {
+      opacity: 1;
+    }
+    
+    .project-overlay {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+    }
+    
+    /* Gradient text */
     .gradient-text {
-      background: linear-gradient(135deg, #0F172A 0%, #3B82F6 60%, #A855F7 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
-    .feature-hover {
-      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    }
-    .feature-hover:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
-    }
-    .mockup-window {
-      background: #0a0c10;
-      border-radius: 24px;
-      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.35);
-    }
-    @keyframes float-slow {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-12px); }
-    }
-    .float-element {
-      animation: float-slow 4s ease-in-out infinite alternate;
+    
+    /* Skill tags */
+    .skill-tag {
+      transition: all 0.3s ease;
+      cursor: default;
     }
     
-    /* JSON-LD Structured Data */
-    .structured-data {
-      display: none;
+    .skill-tag:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+    
+    /* Glow effect */
+    .glow {
+      animation: glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+      }
+    }
+    
+    /* Scroll animations */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
+    }
+    
+    .scroll-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 4px;
+    }
+    
+    /* Loading spinner */
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Smooth scroll behavior */
+    html {
+      scroll-behavior: smooth;
     }
   </style>
-  
-  <!-- JSON-LD Structured Data for SEO -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Exploits",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Web",
-    "description": "Portfolio management platform for developers and designers to host HTML projects, track analytics, and create stunning portfolios.",
-    "url": "https://myexploits.vercel.app/",
-    "screenshot": "https://myexploits.vercel.app/og-image.png",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "author": {
-      "@type": "Organization",
-      "name": "Exploits",
-      "url": "https://myexploits.vercel.app/"
-    },
-    "featureList": [
-      "Hosted HTML/CSS/JS Projects",
-      "Built-in Analytics",
-      "JWT Authentication",
-      "Public Portfolio Routes",
-      "Project Management",
-      "Privacy-First Tracking"
-    ]
-  }
-  </script>
 </head>
 <body class="antialiased">
-
-  <!-- NAVBAR -->
-  <nav class="w-full fixed top-0 z-50 py-4 px-6 md:px-12 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-md">
-          <span class="text-white font-black text-xl">⚡</span>
-        </div>
-        <span class="font-extrabold text-2xl tracking-tight text-gray-800">exploits<span class="text-blue-600">.</span></span>
-      </div>
-      <div class="hidden md:flex gap-8 text-gray-600 font-medium">
-        <a href="#features" class="hover:text-blue-600 transition">Features</a>
-        <a href="#demos" class="hover:text-blue-600 transition">Live demos</a>
-        <a href="#showcase" class="hover:text-blue-600 transition">Showcase</a>
-        <a href="/docs" class="hover:text-blue-600 transition">Docs</a>
-      </div>
-      <div class="flex gap-3">
-        <a href="/login" class="hidden md:block px-5 py-2 rounded-full text-gray-700 font-medium hover:bg-gray-100 transition">Sign in</a>
-        <a href="/login" class="px-5 py-2 rounded-full bg-gray-900 text-white font-semibold shadow-md hover:bg-gray-800 transition">Create account</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HERO SECTION -->
-  <section class="pt-32 pb-20 md:pt-40 md:pb-28 px-6 max-w-7xl mx-auto">
-    <div class="flex flex-col lg:flex-row items-center gap-14">
-      <div class="flex-1 text-center lg:text-left">
-        <div class="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full text-blue-700 text-sm font-medium mb-6">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-          </span>
-          portfolio ecosystem 2.0
-        </div>
-        <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.2] tracking-tight text-gray-900">
-          Build, host & <span class="gradient-text">dominate</span><br>your creative identity.
-        </h1>
-        <p class="text-xl text-gray-500 mt-6 max-w-xl mx-auto lg:mx-0">
-          The all‑in‑one portfolio suite for developers, designers, and makers. 
-          Host HTML projects, track analytics, and craft stunning profiles — no lock‑in.
-        </p>
-        <div class="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
-          <a href="/login" class="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">Get Started Free →</a>
-          <a href="#demos" class="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-800 font-medium hover:bg-gray-50 transition">View Live Demos</a>
-        </div>
-        <div class="flex flex-wrap gap-6 mt-12 text-sm text-gray-500 justify-center lg:justify-start">
-          <div class="flex items-center gap-2">✨ <span>Hosted HTML/CSS/JS</span></div>
-          <div class="flex items-center gap-2">📊 <span>Built‑in analytics</span></div>
-          <div class="flex items-center gap-2">🔗 <span>Redirect or custom code</span></div>
-        </div>
-      </div>
-      <div class="flex-1 relative">
-        <div class="mockup-window rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
-          <div class="bg-[#0F1117] p-2 flex items-center gap-2 border-b border-gray-800">
-            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-            <span class="text-gray-400 text-xs ml-2">portfolio preview — @dev_explorer</span>
-          </div>
-          <div class="bg-white p-5 min-h-[320px] flex flex-col items-center justify-center text-center">
-            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 flex items-center justify-center text-white text-3xl shadow-md">🚀</div>
-            <h3 class="text-xl font-bold mt-3 text-gray-800">Alex Rivera</h3>
-            <p class="text-gray-500 text-sm max-w-xs">creative full‑stack dev · interactive storyteller</p>
-            <div class="grid grid-cols-2 gap-3 mt-5 w-full max-w-sm">
-              <div class="bg-gray-100 rounded-xl p-2 text-xs font-mono">✨ three.js demo</div>
-              <div class="bg-gray-100 rounded-xl p-2 text-xs font-mono">⚡ react playground</div>
-            </div>
-            <div class="mt-5 w-full bg-gray-100 rounded-full h-2"></div>
-            <p class="text-xs text-gray-400 mt-3">⚡ hosted project active · 128 visits</p>
-          </div>
-        </div>
-        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-blue-200 rounded-full blur-3xl opacity-40 -z-10"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURE GRID -->
-  <section id="features" class="py-20 px-6 bg-white border-y border-gray-100">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <span class="text-blue-600 font-semibold text-sm uppercase tracking-wider">Core power</span>
-        <h2 class="text-4xl md:text-5xl font-bold mt-2 text-gray-900">Everything you need to <br>stand out</h2>
-        <p class="text-gray-500 text-lg mt-4">No more scattered links — manage your portfolio, projects, and stats from one dashboard.</p>
-      </div>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl mb-4">📁</div>
-          <h3 class="text-xl font-bold">Hosted projects + full HTML</h3>
-          <p class="text-gray-500 mt-2">Deploy interactive demos, three.js scenes, or design prototypes. Each project gets a unique URL.</p>
-        </div>
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-2xl mb-4">📈</div>
-          <h3 class="text-xl font-bold">Privacy-first analytics</h3>
-          <p class="text-gray-500 mt-2">Track unique visitors, referrers, and direct traffic. IPs are hashed, and you own every byte of data.</p>
-        </div>
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-2xl mb-4">🎨</div>
-          <h3 class="text-xl font-bold">Customize profile & portfolio</h3>
-          <p class="text-gray-500 mt-2">Switch between hosted, redirect, or minimal mode. Update icon, bio, and portfolio content with zero friction.</p>
-        </div>
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-2xl mb-4">🔑</div>
-          <h3 class="text-xl font-bold">JWT auth + secure storage</h3>
-          <p class="text-gray-500 mt-2">Password hashing (SHA256+salt), 14d tokens, email indexing. Admin tools to manage users safely.</p>
-        </div>
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-2xl mb-4">🌐</div>
-          <h3 class="text-xl font-bold">Public portfolio routes</h3>
-          <p class="text-gray-500 mt-2">Share your tag: <span class="font-mono text-blue-600">myexploits.vercel.app/portfolio?user_slug=username</span> — instant web presence.</p>
-        </div>
-        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
-          <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl mb-4">🛠️</div>
-          <h3 class="text-xl font-bold">Project types: image/link/hosted</h3>
-          <p class="text-gray-500 mt-2">Showcase anything — from design mocks to external tools. Visibility: public / private / test.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DEMO SCREENSHOTS / INTERACTIVE DEMO SHOWCASE -->
-  <section id="demos" class="py-24 px-6 bg-gradient-to-b from-gray-50 to-white">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-14">
-        <h2 class="text-4xl font-bold text-gray-900">See Exploits in action</h2>
-        <p class="text-gray-500 text-lg mt-2">Real previews — hosted projects, analytics dashboard & portfolio snapshots</p>
-      </div>
-
-      <!-- demo cards -->
-      <div class="grid md:grid-cols-2 gap-10">
-        <!-- card 1: hosted project preview -->
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 transition-all hover:shadow-2xl">
-          <div class="bg-gray-900 text-white text-xs px-4 py-2 flex justify-between items-center">
-            <span>🌐 live preview: three.js galaxy</span>
-            <span class="bg-blue-500/20 px-2 py-0.5 rounded-full">hosted project</span>
-          </div>
-          <div class="p-5 bg-white">
-            <div class="aspect-video bg-gradient-to-br from-indigo-900 to-purple-800 rounded-xl flex items-center justify-center text-white shadow-inner">
-              <div class="text-center">
-                <div class="text-5xl mb-2">✨🌀</div>
-                <p class="font-mono text-sm">interactive 3D galaxy — click & drag</p>
-                <button onclick="openDemoModal('galaxy')" class="mt-3 text-xs bg-white/20 backdrop-blur px-4 py-1.5 rounded-full hover:bg-white/30 transition">preview demo</button>
-              </div>
-            </div>
-            <div class="mt-4 flex justify-between items-center">
-              <div><span class="font-bold">galaxy-explorer</span><span class="text-gray-400 text-sm ml-2">/projects/</span></div>
-              <div class="flex gap-2 text-xs text-gray-500">📊 342 visits · unique 124</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- card 2: analytics dashboard mock -->
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 transition-all hover:shadow-2xl">
-          <div class="bg-gray-800 text-white text-xs px-4 py-2 flex justify-between">
-            <span>📊 analytics dashboard</span>
-            <span class="bg-green-500/30 px-2 rounded-full">real‑time</span>
-          </div>
-          <div class="p-5">
-            <div class="bg-gray-50 rounded-xl p-3 font-mono text-sm space-y-2">
-              <div class="flex justify-between border-b pb-1"><span>Total visits</span><span class="font-bold">1,284</span></div>
-              <div class="flex justify-between border-b pb-1"><span>Unique visitors (24h)</span><span class="font-bold">203</span></div>
-              <div class="flex justify-between"><span>Top referrer</span><span class="text-blue-600">twitter.com/share</span></div>
-              <div class="w-full bg-gray-200 rounded-full h-2 mt-2"><div class="bg-purple-500 w-3/4 h-2 rounded-full"></div></div>
-              <p class="text-xs text-gray-400 mt-2">IP‑hashed · GDPR friendly · direct traffic detected</p>
-            </div>
-            <div class="mt-4 text-right"><span class="text-xs text-gray-400">last 100 visits tracked per project</span></div>
-          </div>
-        </div>
-
-        <!-- card 3: portfolio modes (switch) + screenshot -->
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 md:col-span-2 grid md:grid-cols-2 gap-0">
-          <div class="p-6">
-            <h3 class="text-xl font-bold flex items-center gap-2"><span>🎭</span> Portfolio flexibility</h3>
-            <ul class="mt-3 space-y-3 text-gray-600">
-              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Hosted mode</strong> – custom HTML/CSS/JS with full interactivity</li>
-              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Redirect mode</strong> – send visitors to your custom domain</li>
-              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Minimal profile</strong> – show icon + bio + coming soon</li>
-            </ul>
-            <div class="mt-5 p-3 bg-gray-100 rounded-xl text-sm font-mono">
-              <span class="text-gray-500">GET</span> https://myexploits.vercel.app/portfolio?user_slug=designwiz<br/>
-              → returns hosted portfolio or redirect
-            </div>
-          </div>
-          <div class="bg-gray-900 p-5 flex items-center justify-center rounded-bl-2xl">
-            <div class="bg-white/5 p-4 rounded-2xl w-full text-center">
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 mx-auto"></div>
-              <p class="text-white font-mono text-xs mt-2">"designwiz" portfolio → redirects to behance</p>
-              <div class="flex gap-1 justify-center mt-2"><span class="w-2 h-2 bg-green-400 rounded-full"></span><span class="text-gray-300 text-[11px]">redirect active</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- card 4: project creation demo (inline) -->
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70">
-          <div class="bg-gray-100 px-5 py-3 border-b flex gap-3">
-            <div class="w-3 h-3 rounded-full bg-gray-400"></div><div class="w-3 h-3 rounded-full bg-gray-400"></div>
-            <span class="text-sm font-medium">create new project · API example</span>
-          </div>
-          <div class="p-5 bg-gray-50">
-            <pre class="text-xs bg-gray-900 text-green-300 p-4 rounded-xl overflow-x-auto"><code>// POST /api/projects?action=create
-{
-  "name": "glassmorphism UI",
-  "type": "hosted",
-  "visibility": "public",
-  "content": "&lt;div&gt;✨ interactive&lt;/div&gt;"
-}</code></pre>
-            <div class="flex justify-end mt-3"><button onclick="openDemoModal('apiDemo')" class="text-blue-600 text-sm font-medium">▶ try demo response</button></div>
-          </div>
-        </div>
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 flex flex-col">
-          <div class="p-6 flex-1">
-            <div class="flex items-center gap-3"><span class="text-3xl">🧑‍🎨</span><h3 class="font-bold text-xl">For designers & devs</h3></div>
-            <p class="mt-2 text-gray-500">Build a stunning grid of projects with image thumbnails, hosted experiments, and track which ones get the most love.</p>
-            <div class="grid grid-cols-3 gap-2 mt-5">
-              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">🎨</div>
-              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">💻</div>
-              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">📱</div>
-            </div>
-          </div>
-          <div class="bg-blue-50 px-5 py-3 text-xs text-blue-700">⭐ public projects appear on /api/projects?action=public&user_tag=...</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SHOWCASE: real user demo snapshots + stats -->
-  <section id="showcase" class="py-20 px-6 bg-white">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex flex-col md:flex-row justify-between items-end mb-12">
-        <div><span class="text-purple-600 font-semibold text-sm">⚡ live ecosystem</span>
-        <h2 class="text-3xl md:text-4xl font-bold mt-1">What creators build on Exploits</h2></div>
-        <div class="flex gap-1 mt-3"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">+120 projects hosted</span></div>
-      </div>
-      <div class="grid md:grid-cols-3 gap-7">
-        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/26/400/220" alt="Motion Lab portfolio showcase - hosted three.js experiments" class="w-full h-40 object-cover">
-          <div class="p-5"><div class="font-bold">@motion_lab</div><p class="text-gray-500 text-sm">Hosted portfolio with three.js + WebGL experiments. Gets 240 unique visitors/week.</p><div class="flex mt-2 text-xs text-blue-500">🔗 hosted project active</div></div>
-        </div>
-        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/1/400/220" alt="UX Sage portfolio - redirect setup with analytics" class="w-full h-40 object-cover">
-          <div class="p-5"><div class="font-bold">@ux_sage</div><p class="text-gray-500 text-sm">Redirect portfolio → personal site, analytics show 67% traffic from Dribbble.</p><div class="flex mt-2 text-xs text-purple-500">📊 analytics enabled</div></div>
-        </div>
-        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/169/400/220" alt="Code Witch portfolio - multiple hosted projects showcase" class="w-full h-40 object-cover">
-          <div class="p-5"><div class="font-bold">@codewitch</div><p class="text-gray-500 text-sm">5 hosted projects (react playground, canvas game, design system). total visits 1.2k+</p><div class="flex mt-2 text-xs text-green-600">✨ full HTML customisation</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="py-20 px-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-3xl mx-4 md:mx-8 mb-10">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-4xl md:text-5xl font-bold">Ready to launch your portfolio?</h2>
-      <p class="text-gray-300 text-lg mt-4">Join developers and designers who own their creative footprint. Zero lock‑in, full control.</p>
-      <div class="flex flex-wrap justify-center gap-5 mt-10">
-        <a href="/login" class="px-8 py-3 rounded-full bg-white text-gray-900 font-bold shadow-xl hover:bg-gray-100 transition">Get started free</a>
-        <a href="/docs" class="px-8 py-3 rounded-full border border-white/30 text-white font-medium hover:bg-white/10 transition">Read documentation</a>
-      </div>
-      <p class="text-sm text-gray-400 mt-8">✨ No credit card • full API access • Firebase backend</p>
-    </div>
-  </section>
-
-  <!-- footer -->
-  <footer class="py-8 px-6 text-center text-gray-500 text-sm border-t">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-      <span>© 2025 Exploits — portfolio infrastructure for creatives</span>
-      <div class="flex gap-6">
-        <a href="/privacy" class="hover:text-gray-900">Privacy</a>
-        <a href="/terms" class="hover:text-gray-900">Terms</a>
-        <a href="https://github.com/exploits" class="hover:text-gray-900">GitHub</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- DEMO MODAL (interactive preview simulation) -->
-  <div id="demoModal" class="fixed inset-0 flex items-center justify-center z-50 hidden transition-all duration-300" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
-    <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl transform transition-all">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xl font-bold" id="modalTitle">Demo preview</h3>
-        <button onclick="closeDemoModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-      </div>
-      <div id="modalContent" class="mt-4 text-gray-600">
-        <!-- dynamic content -->
-      </div>
-      <div class="mt-6 flex justify-end">
-        <button onclick="closeDemoModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-sm font-medium">Close</button>
+  <!-- Animated Background Particles -->
+  <div class="particles" id="particles"></div>
+  
+  <div id="app" class="relative z-10 min-h-screen">
+    <!-- Loading State -->
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="text-center">
+        <div class="loader mx-auto mb-4"></div>
+        <p class="text-white text-lg font-medium">Loading creative portfolio...</p>
       </div>
     </div>
   </div>
 
   <script>
-    function openDemoModal(type) {
-      const modal = document.getElementById('demoModal');
-      const titleEl = document.getElementById('modalTitle');
-      const contentEl = document.getElementById('modalContent');
-      if (type === 'galaxy') {
-        titleEl.innerText = '🌌 hosted project preview (galaxy-explorer)';
-        contentEl.innerHTML = `<div class="bg-gray-900 rounded-xl p-4 text-white text-center"><div class="text-4xl mb-2">✨🌀✨</div><p class="text-sm">Interactive 3D scene loaded from Exploits hosted project. Full JavaScript/Three.js allowed.<br><span class="text-xs text-gray-400">URL: /portfolio?user_slug=maker&project=galaxy-explorer</span></p><div class="mt-3 flex justify-center gap-2"><span class="bg-blue-500/30 px-2 py-1 rounded-full text-xs">click & drag</span><span class="bg-purple-500/30 px-2 py-1 rounded-full text-xs">live demo</span></div></div><p class="mt-3 text-xs text-gray-500">CSP allows scripts/styles — fully functional HTML/CSS/JS sandbox.</p>`;
-      } else if (type === 'apiDemo') {
-        titleEl.innerText = '⚡ API response simulation';
-        contentEl.innerHTML = `<pre class="bg-gray-800 text-green-300 p-3 rounded-lg text-xs overflow-auto">{
-  "message": "Project created successfully",
-  "project": {
-    "projectId": "proj_1739981234_abc123",
-    "name": "glassmorphism UI",
-    "slug": "glassmorphism-ui",
-    "hosted_url": "https://myexploits.vercel.app/projects/user123/glassmorphism-ui",
-    "visibility": "public"
-  },
-  "publish_url": "https://myexploits.vercel.app/user123/glassmorphism-ui"
-}</pre><p class="text-xs mt-2 text-gray-500">✨ Analytics session auto‑created if enabled.</p>`;
-      } else {
-        titleEl.innerText = 'Exploits live demo';
-        contentEl.innerHTML = `<div class="flex flex-col gap-3"><div class="bg-gray-100 p-4 rounded-xl text-center">🎯 Interactive project gallery, real-time visit counter and privacy-first analytics.</div><div class="text-sm text-blue-600">Try creating your own: <span class="font-mono">POST /api/auth?action=create</span></div></div>`;
+    const API_BASE = 'https://myexploits.vercel.app/api';
+    
+    // Create animated particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 50;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        const size = Math.random() * 4 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+        particle.style.animationDelay = `${Math.random() * 10}s`;
+        particlesContainer.appendChild(particle);
       }
-      modal.classList.remove('hidden');
     }
-    function closeDemoModal() {
-      document.getElementById('demoModal').classList.add('hidden');
+    
+    // Get user_slug from URL
+    function getUserSlug() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('user_slug');
     }
-    window.onclick = function(e) {
-      const modal = document.getElementById('demoModal');
-      if (e.target === modal) closeDemoModal();
+    
+    // Fetch user profile data
+    async function fetchUserData(userSlug) {
+      try {
+        const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('User not found');
+          throw new Error('Failed to fetch user data');
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
     }
+    
+    // Fetch user's public projects
+    async function fetchUserProjects(userSlug) {
+      try {
+        const response = await fetch(`${API_BASE}/projects?action=public&user_tag=${userSlug}`);
+        if (!response.ok) return [];
+        const data = await response.json();
+        return data.projects || [];
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        return [];
+      }
+    }
+    
+    // Escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Copy URL to clipboard
+    window.copyUrl = function() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50 animate-bounce';
+        tooltip.innerHTML = '<i class="fas fa-check mr-2"></i>URL copied!';
+        document.body.appendChild(tooltip);
+        setTimeout(() => tooltip.remove(), 2000);
+      });
+    };
+    
+    // View project detail
+    window.viewProject = function(userId, projectSlug) {
+      window.location.href = `/project/${userId}/${projectSlug}`;
+    };
+    
+    // Filter projects
+    window.filterProjects = function(type) {
+      const projects = document.querySelectorAll('.project-card');
+      const buttons = document.querySelectorAll('.filter-btn');
+      
+      buttons.forEach(btn => {
+        btn.classList.remove('active', 'bg-white/20', 'text-white', 'shadow-lg');
+        btn.classList.add('bg-white/10', 'text-white/80');
+        if (btn.getAttribute('data-type') === type) {
+          btn.classList.add('active', 'bg-white/20', 'text-white', 'shadow-lg');
+          btn.classList.remove('bg-white/10', 'text-white/80');
+        }
+      });
+      
+      projects.forEach(project => {
+        if (type === 'all' || project.dataset.type === type) {
+          project.style.display = 'block';
+          setTimeout(() => {
+            project.style.opacity = '1';
+            project.style.transform = 'translateY(0)';
+          }, 50);
+        } else {
+          project.style.opacity = '0';
+          project.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            project.style.display = 'none';
+          }, 300);
+        }
+      });
+    };
+    
+    // Render error state
+    function renderError(message, userSlug) {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="flex items-center justify-center min-h-screen p-6">
+          <div class="glass-card rounded-3xl max-w-lg w-full p-10 text-center transform transition-all">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
+              <i class="fas fa-sad-tear text-white text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-3">Portfolio Not Found</h2>
+            <p class="text-gray-600 mb-6">${escapeHtml(message)}</p>
+            <div class="space-y-3">
+              <a href="/" class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105">
+                <i class="fas fa-home mr-2"></i> Return Home
+              </a>
+              <a href="/login" class="block w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all">
+                <i class="fas fa-rocket mr-2"></i> Create Your Portfolio
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Render hosted portfolio
+    async function renderHostedPortfolio(userTag) {
+      try {
+        const response = await fetch(`${API_BASE}/auth?user_tag=${userTag}`);
+        if (response.ok) {
+          const html = await response.text();
+          document.getElementById('app').innerHTML = html;
+          return true;
+        }
+      } catch (error) {
+        console.error('Error loading hosted portfolio:', error);
+      }
+      return false;
+    }
+    
+    // Render beautiful minimal portfolio
+    function renderMinimalProfile(user, projects) {
+      const app = document.getElementById('app');
+      const totalProjects = projects.length;
+      const hostedProjects = projects.filter(p => p.type === 'hosted').length;
+      const featuredProjects = projects.slice(0, 6);
+      
+      app.innerHTML = `
+        <!-- Hero Section with Floating Elements -->
+        <div class="relative overflow-hidden">
+          <!-- Decorative floating elements -->
+          <div class="absolute top-20 left-10 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+          
+          <div class="max-w-7xl mx-auto px-4 py-12 md:py-20 relative">
+            <!-- Profile Header -->
+            <div class="scroll-reveal">
+              <div class="glass-card rounded-3xl p-8 md:p-12 mb-12 shadow-2xl">
+                <div class="flex flex-col lg:flex-row items-center gap-12">
+                  <!-- Avatar with glow effect -->
+                  <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-xl opacity-75 animate-pulse"></div>
+                    <img src="${user.icon || 'https://picsum.photos/200/200'}" 
+                         class="relative w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-white shadow-2xl glow"
+                         onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=667eea&color=fff&size=200&bold=true'">
+                    <div class="absolute bottom-2 right-2 bg-green-500 rounded-full p-2 shadow-lg border-2 border-white">
+                      <i class="fas fa-check-circle text-white text-sm"></i>
+                    </div>
+                  </div>
+                  
+                  <!-- User Info -->
+                  <div class="flex-1 text-center lg:text-left">
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
+                      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800">${escapeHtml(user.user_tag)}</h1>
+                      <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-semibold shadow-lg">
+                        <i class="fas fa-star text-xs"></i> Verified Creator
+                      </span>
+                    </div>
+                    <p class="text-xl text-gray-600 max-w-2xl leading-relaxed mb-6">${escapeHtml(user.description || 'Creative developer & designer passionate about building amazing digital experiences that inspire and delight.')}</p>
+                    
+                    <!-- Stats Grid -->
+                    <div class="flex flex-wrap gap-6 justify-center lg:justify-start mb-6">
+                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
+                        <i class="fas fa-calendar-alt text-blue-500 text-lg"></i>
+                        <span class="text-sm text-gray-700">Joined ${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '2024'}</span>
+                      </div>
+                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
+                        <i class="fas fa-folder-open text-purple-500 text-lg"></i>
+                        <span class="text-sm text-gray-700">${totalProjects} Projects</span>
+                      </div>
+                      <div class="flex items-center gap-3 bg-white/50 rounded-full px-4 py-2 backdrop-blur">
+                        <i class="fas fa-code text-green-500 text-lg"></i>
+                        <span class="text-sm text-gray-700">${hostedProjects} Interactive</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Portfolio URL with copy -->
+                    <div class="inline-flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 shadow-sm">
+                      <i class="fas fa-link text-gray-500 text-sm"></i>
+                      <code class="text-xs text-gray-600">myexploits.vercel.app/portfolio?user_slug=${user.user_tag}</code>
+                      <button onclick="copyUrl()" class="text-blue-500 hover:text-blue-600 ml-2 transition">
+                        <i class="fas fa-copy"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- CTA Button -->
+                  <div class="lg:self-start">
+                    <a href="/login" class="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
+                      <i class="fas fa-rocket group-hover:animate-pulse"></i>
+                      <span>Create Your Portfolio</span>
+                      <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Projects Section -->
+            <div class="scroll-reveal">
+              <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+                <div>
+                  <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">
+                    <i class="fas fa-sparkle mr-3"></i>Featured Work
+                  </h2>
+                  <p class="text-white/80">Creative projects that showcase expertise and passion</p>
+                </div>
+                ${totalProjects > 0 ? `
+                  <div class="flex gap-2 bg-white/10 backdrop-blur rounded-full p-1">
+                    <button data-type="all" onclick="filterProjects('all')" class="filter-btn active px-5 py-2 rounded-full bg-white/20 text-white font-medium transition-all">
+                      All
+                    </button>
+                    <button data-type="hosted" onclick="filterProjects('hosted')" class="filter-btn px-5 py-2 rounded-full bg-white/10 text-white/80 font-medium transition-all">
+                      Hosted
+                    </button>
+                    <button data-type="link" onclick="filterProjects('link')" class="filter-btn px-5 py-2 rounded-full bg-white/10 text-white/80 font-medium transition-all">
+                      Links
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                ${featuredProjects.length > 0 ? featuredProjects.map((project, index) => `
+                  <div class="project-card group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-xl transform transition-all duration-500" 
+                       data-type="${project.type}" 
+                       data-visibility="${project.visibility}"
+                       style="animation-delay: ${index * 0.1}s"
+                       onclick="viewProject('${project.user_id}', '${project.slug}')">
+                    <div class="relative overflow-hidden">
+                      <img src="${project.image}" class="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-500" 
+                           onerror="this.src='https://picsum.photos/400/300?random=${index}'">
+                      <div class="project-overlay absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button class="bg-white text-purple-600 px-6 py-3 rounded-full font-semibold shadow-xl transform hover:scale-105 transition">
+                          View Project <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                      </div>
+                      <div class="absolute top-4 right-4 flex gap-2">
+                        <span class="px-3 py-1.5 rounded-full text-xs font-bold ${project.type === 'hosted' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : project.type === 'link' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'} shadow-lg">
+                          ${project.type === 'hosted' ? '<i class="fas fa-code mr-1"></i> Hosted' : project.type === 'link' ? '<i class="fas fa-external-link-alt mr-1"></i> Link' : '<i class="fas fa-image mr-1"></i> Image'}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="p-6">
+                      <h3 class="font-bold text-xl mb-2 text-gray-800 line-clamp-1">${escapeHtml(project.name)}</h3>
+                      <p class="text-gray-600 text-sm mb-4 line-clamp-2">${escapeHtml(project.description || 'No description available.')}</p>
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                          <i class="far fa-calendar-alt"></i>
+                          <span>${new Date(project.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <span class="text-blue-600 group-hover:text-purple-600 transition text-sm font-medium">
+                          Explore <i class="fas fa-arrow-right ml-1 group-hover:translate-x-1 transition"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                `).join('') : `
+                  <div class="col-span-full">
+                    <div class="glass-card-light rounded-3xl p-16 text-center">
+                      <div class="w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mx-auto mb-6 shadow-xl">
+                        <i class="fas fa-palette text-white text-4xl"></i>
+                      </div>
+                      <h3 class="text-2xl font-bold text-gray-800 mb-3">No Public Projects Yet</h3>
+                      <p class="text-gray-600 mb-6 max-w-md mx-auto">This creator is crafting something amazing. Check back soon for updates!</p>
+                      <a href="/login" class="inline-flex items-center gap-2 text-blue-600 hover:text-purple-600 font-semibold transition">
+                        Create your first project <i class="fas fa-arrow-right"></i>
+                      </a>
+                    </div>
+                  </div>
+                `}
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="scroll-reveal mt-20">
+              <div class="text-center pt-8 border-t border-white/20">
+                <div class="flex flex-wrap justify-center gap-6 mb-4">
+                  <a href="/" class="text-white/80 hover:text-white transition flex items-center gap-2">
+                    <i class="fas fa-home"></i> Home
+                  </a>
+                  <a href="/login" class="text-white/80 hover:text-white transition flex items-center gap-2">
+                    <i class="fas fa-rocket"></i> Get Started
+                  </a>
+                  <a href="/docs" class="text-white/80 hover:text-white transition flex items-center gap-2">
+                    <i class="fas fa-book"></i> Documentation
+                  </a>
+                  <a href="#" class="text-white/80 hover:text-white transition flex items-center gap-2">
+                    <i class="fab fa-github"></i> GitHub
+                  </a>
+                </div>
+                <p class="text-white/60 text-sm">
+                  <i class="fas fa-bolt mr-1"></i> Powered by Exploits — The portfolio platform for developers & designers
+                </p>
+                <p class="text-white/40 text-xs mt-2">
+                  © 2024 Exploits. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Trigger scroll reveal animations
+      setTimeout(() => {
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach(el => el.classList.add('revealed'));
+      }, 100);
+    }
+    
+    // Initialize portfolio
+    async function init() {
+      createParticles();
+      
+      const userSlug = getUserSlug();
+      
+      if (!userSlug) {
+        renderError('No user specified. Please provide a valid username.', null);
+        return;
+      }
+      
+      try {
+        // Show loading with username
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+              <div class="loader mx-auto mb-4"></div>
+              <p class="text-white text-lg font-medium">Loading portfolio for @${escapeHtml(userSlug)}...</p>
+            </div>
+          </div>
+        `;
+        
+        // Fetch user data and projects
+        const [user, projects] = await Promise.all([
+          fetchUserData(userSlug),
+          fetchUserProjects(userSlug)
+        ]);
+        
+        // Check portfolio type
+        const portfolio = user.portfolio || { type: 'none' };
+        
+        if (portfolio.type === 'hosted') {
+          const success = await renderHostedPortfolio(userSlug);
+          if (!success) {
+            renderMinimalProfile(user, projects);
+          }
+        } else if (portfolio.type === 'redirect' && portfolio.redirect_url) {
+          window.location.href = portfolio.redirect_url;
+          return;
+        } else {
+          renderMinimalProfile(user, projects);
+        }
+        
+        // Update page title
+        document.title = `${user.user_tag} | Creative Portfolio - Exploits`;
+        
+        // Add meta tags
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+          metaDescription = document.createElement('meta');
+          metaDescription.name = 'description';
+          document.head.appendChild(metaDescription);
+        }
+        metaDescription.content = user.description || `Explore the creative portfolio of ${user.user_tag} on Exploits`;
+        
+      } catch (error) {
+        console.error('Error:', error);
+        if (error.message === 'User not found') {
+          renderError(`User "${escapeHtml(userSlug)}" doesn't exist or hasn't created a portfolio yet.`, userSlug);
+        } else {
+          renderError('Unable to load portfolio. Please try again later.', userSlug);
+        }
+      }
+    }
+    
+    // Start the app
+    init();
   </script>
 </body>
 </html>
