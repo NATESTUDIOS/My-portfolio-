@@ -2,424 +2,545 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio - Exploits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Exploits Dashboard — Premium Portfolio Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #a855f7;
-      --accent: #06b6d4;
-      --bg-dark: #0a0c10;
-      --card-bg: rgba(15, 23, 42, 0.6);
+      --bg-main: #fcfcfd;
+      --sidebar-bg: rgba(255, 255, 255, 0.98);
+      --accent: #4f46e5;
     }
 
-    * { 
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    
+    body { 
+      background-color: var(--bg-main);
+      background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                        radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%);
     }
 
-    body {
-      background: linear-gradient(135deg, #0a0c10 0%, #0f172a 50%, #1e1b4b 100%);
-      min-height: 100vh;
-      color: #e2e8f0;
+    /* Sidebar Mobile Styles */
+    .sidebar-blur {
+      backdrop-filter: blur(12px);
+      background: var(--sidebar-bg);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1000;
+        width: 280px;
+        height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.1);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 1rem !important;
+      }
+      .mobile-menu-btn {
+        display: flex;
+      }
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+      }
+      .overlay.active {
+        display: block;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-menu-btn, .mobile-overlay {
+        display: none;
+      }
+    }
+
+    .sidebar-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
     }
 
-    /* Animated Background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
+    .sidebar-item.active {
+      background: white;
+      color: var(--accent);
+      box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.12);
+    }
+
+    .sidebar-item.active::before {
+      content: "";
+      position: absolute;
+      left: -16px;
+      height: 20px;
+      width: 4px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
     }
 
     .glass-card {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 1.5rem;
-    }
-
-    .glass-card-light {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 1rem;
-    }
-
-    .project-card {
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid rgba(99, 102, 241, 0.15);
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
     }
 
-    .project-card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(99, 102, 241, 0.4);
-      background: rgba(15, 23, 42, 0.7);
-      box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.5);
+    .glass-card:hover {
+      transform: translateY(-4px);
+      background: white;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
       transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -10px rgba(99, 102, 241, 0.5);
+      filter: brightness(1.1);
+      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+      transform: translateY(-1px);
     }
 
-    .btn-outline {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      transition: all 0.3s ease;
+    .toast {
+      animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
 
-    .btn-outline:hover {
-      background: rgba(99, 102, 241, 0.2);
-      border-color: rgba(99, 102, 241, 0.6);
+    @keyframes toastSlide {
+      from { transform: translateX(100%) scale(0.9); opacity: 0; }
+      to { transform: translateX(0) scale(1); opacity: 1; }
     }
 
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+    .modal-overlay {
+      background: rgba(15, 23, 42, 0.3);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Responsive Grid */
+    @media (max-width: 640px) {
+      .projects-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+      .dashboard-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 1rem;
       }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .animate-up {
-      animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    }
-
-    .animate-in {
-      animation: fadeIn 0.6s ease-out forwards;
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; }
-
-    /* Filter button active state */
-    .filter-btn {
-      transition: all 0.2s ease;
-    }
-    
-    .filter-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      border-color: transparent;
-    }
-
-    /* Project image container */
-    .project-image {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .glass-card {
-        border-radius: 1rem;
+      .dashboard-header button {
+        width: 100%;
       }
     }
   </style>
 </head>
-<body>
-  <div id="app" class="relative z-10 min-h-screen">
-    <!-- Elegant Loading State -->
-    <div class="flex items-center justify-center min-h-screen">
-      <div class="text-center">
-        <div class="relative w-20 h-20 mx-auto mb-6">
-          <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
-          <div class="absolute inset-0 border-4 border-t-indigo-500 rounded-full animate-spin"></div>
+<body class="custom-scrollbar relative">
+
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="mobile-overlay overlay"></div>
+
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-72 sidebar-blur border-r border-slate-200/60 fixed h-full z-50 transition-transform">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3.5 mb-2">
+            <div class="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 rotate-3 hover:rotate-0 transition-transform duration-300">
+              <i class="fas fa-bolt text-white text-xl"></i>
+            </div>
+            <div>
+              <a href="/" class="font-extrabold text-2xl tracking-tight text-slate-900 leading-none">exploits<span class="text-indigo-600">.</span></a>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Creator Suite</p>
+            </div>
+          </div>
+          <!-- Close button for mobile -->
+          <button id="closeSidebarBtn" class="md:hidden w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <p class="text-indigo-400/80 font-medium tracking-wide animate-pulse">Loading portfolio...</p>
       </div>
-    </div>
+
+      <nav class="px-4 flex flex-col gap-2">
+        <div data-tab="projects" class="sidebar-item active flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-semibold text-slate-500 cursor-pointer">
+          <i class="fas fa-folder-tree w-5"></i><span>My Projects</span>
+        </div>
+        <div data-tab="portfolio" class="sidebar-item flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-semibold text-slate-500 cursor-pointer">
+          <i class="fas fa-palette w-5"></i><span>Portfolio Settings</span>
+        </div>
+        <div data-tab="analytics" class="sidebar-item flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-semibold text-slate-500 cursor-pointer">
+          <i class="fas fa-chart-pie w-5"></i><span>Analytics</span>
+        </div>
+        <div data-tab="profile" class="sidebar-item flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-semibold text-slate-500 cursor-pointer">
+          <i class="fas fa-user-circle w-5"></i><span>Profile</span>
+        </div>
+      </nav>
+
+      <div class="absolute bottom-8 left-0 right-0 px-6">
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden" id="miniAvatar">
+                    <img src="https://picsum.photos/100" alt="">
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-slate-900 truncate" id="dashboardUserTag">@username</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Free Plan</p>
+                </div>
+            </div>
+        </div>
+        <button id="logoutBtn" class="w-full flex items-center justify-center gap-2 text-slate-400 hover:text-red-500 font-bold text-sm py-2 transition-colors">
+          <i class="fas fa-power-off text-xs"></i> Log Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="flex-1 md:ml-72 p-4 md:p-10 transition-all">
+      <!-- Mobile Header with Menu Button -->
+      <div class="md:hidden flex items-center justify-between mb-6 sticky top-0 bg-white/80 backdrop-blur z-40 p-4 -mt-4 -mx-4 px-4 pb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+            <i class="fas fa-bolt text-white text-sm"></i>
+          </div>
+          <span class="font-extrabold text-xl tracking-tight">exploits<span class="text-indigo-600">.</span></span>
+        </div>
+        <button id="menuBtn" class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i class="fas fa-bars text-lg"></i>
+        </button>
+      </div>
+      
+      <div id="dashboardContent" class="max-w-6xl mx-auto">
+        <!-- Dynamically Injected -->
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden fixed bottom-8 right-8 left-8 md:left-auto z-[100] bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 md:min-w-[300px]">
+      <div class="flex items-center gap-4">
+          <div id="toastIcon" class="w-10 h-10 rounded-xl flex items-center justify-center"></div>
+          <div>
+              <p id="toastTitle" class="font-bold text-slate-900 text-sm"></p>
+              <p id="toastMessage" class="text-slate-500 text-xs mt-0.5"></p>
+          </div>
+      </div>
   </div>
 
   <script>
     const API_BASE = 'https://myexploits.vercel.app/api';
+    let currentUser = null;
+    let activeTab = 'projects';
 
-    function getUserSlug() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('user_slug');
+    // Mobile menu functions
+    function openMobileMenu() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('mobileOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    async function fetchUserData(userSlug) {
-      const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
-      if (!response.ok) throw new Error(response.status === 404 ? 'User not found' : 'Failed to load profile');
-      return await response.json();
+    function closeMobileMenu() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobileOverlay').classList.remove('active');
+      document.body.style.overflow = '';
     }
 
-    async function fetchUserProjects(userSlug) {
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const title = document.getElementById('toastTitle');
+      const msg = document.getElementById('toastMessage');
+
+      toast.classList.remove('hidden');
+      title.textContent = isError ? 'Error Occurred' : 'Success';
+      msg.textContent = message;
+      
+      icon.className = isError 
+        ? 'w-10 h-10 rounded-xl flex items-center justify-center bg-red-50 text-red-500' 
+        : 'w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-500';
+      icon.innerHTML = isError ? '<i class="fas fa-circle-exclamation"></i>' : '<i class="fas fa-check-circle"></i>';
+
+      setTimeout(() => toast.classList.add('hidden'), 4000);
+    }
+
+    function getAuthToken() { return localStorage.getItem('exploits_token'); }
+
+    async function fetchWithAuth(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) { window.location.href = '/login'; return; }
+      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers };
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) { localStorage.clear(); window.location.href = '/login'; }
+      return response;
+    }
+
+    async function loadUserProfile() {
+      const userTag = localStorage.getItem('exploits_user_tag');
+      const userId = localStorage.getItem('exploits_user_id');
+      if (!userTag) { window.location.href = '/login'; return; }
+
+      document.getElementById('dashboardUserTag').textContent = `@${userTag}`;
+      
       try {
-        const response = await fetch(`${API_BASE}/projects?action=public&user_tag=${userSlug}`);
-        const data = await response.json();
-        return data.projects || [];
-      } catch (e) { 
-        return []; 
+        const response = await fetch(`${API_BASE}/auth?user_tag=${userTag}`);
+        if (response.ok) {
+            currentUser = await response.json();
+            if(currentUser.icon) document.querySelector('#miniAvatar img').src = currentUser.icon;
+        } else {
+            currentUser = { user_tag: userTag, description: 'Digital Architect' };
+        }
+      } catch (e) {
+        currentUser = { user_tag: userTag, description: 'Digital Architect' };
       }
     }
 
-    function renderError(message) {
-      document.getElementById('app').innerHTML = `
-        <div class="flex items-center justify-center min-h-screen p-6">
-          <div class="glass-card max-w-md w-full p-10 text-center animate-up">
-            <div class="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-6">
-              <i class="fas fa-compass text-4xl text-indigo-400"></i>
-            </div>
-            <h2 class="text-2xl font-bold mb-3">Portfolio Not Found</h2>
-            <p class="text-slate-400 mb-8">${escapeHtml(message)}</p>
-            <a href="/" class="btn-primary inline-block w-full py-3 rounded-xl font-semibold text-center">
-              Return Home
-            </a>
+    async function renderProjects() {
+      const container = document.getElementById('dashboardContent');
+      container.innerHTML = `
+        <div class="dashboard-header flex justify-between items-end mb-6 md:mb-10">
+          <div class="flex-1">
+            <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">My Projects</h1>
+            <p class="text-slate-500 text-xs md:text-sm mt-1 md:mt-2 font-medium">Manage and deploy your creative works.</p>
           </div>
+          <button id="newProjectBtn" class="btn-primary text-white px-4 py-2.5 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-100 text-sm md:text-base">
+            <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">Create Project</span>
+            <span class="sm:hidden">Create</span>
+          </button>
         </div>
+        <div id="projectsGrid" class="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"></div>
       `;
+
+      const response = await fetchWithAuth(`${API_BASE}/projects?action=list`);
+      const { projects = [] } = await response.json();
+      const grid = document.getElementById('projectsGrid');
+
+      if (projects.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 md:py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl md:rounded-[2rem] text-center">
+            <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl md:rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-4 md:mb-6">
+                <i class="fas fa-folder-open text-2xl md:text-3xl text-slate-300"></i>
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-slate-900">No projects yet</h3>
+            <p class="text-slate-500 text-xs md:text-sm mt-1 md:mt-2 mb-4 md:mb-8 px-4">Ready to showcase your next big idea?</p>
+            <button onclick="openProjectModal()" class="text-indigo-600 font-bold text-sm md:text-base hover:underline">Start building <i class="fas fa-arrow-right ml-1"></i></button>
+          </div>
+        `;
+      } else {
+        grid.innerHTML = projects.map(proj => `
+          <div class="glass-card rounded-xl md:rounded-[2rem] p-4 md:p-5">
+            <div class="relative group overflow-hidden rounded-xl md:rounded-2xl mb-3 md:mb-5 aspect-video bg-slate-100">
+              <img src="${proj.image || 'https://picsum.photos/400/300'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 md:gap-3">
+                 <button data-slug="${proj.slug}" class="editProjectBtn w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
+                    <i class="fas fa-pen-nib text-xs md:text-sm"></i>
+                 </button>
+                 ${proj.hosted_url ? `<a href="${proj.hosted_url}" target="_blank" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors"><i class="fas fa-external-link-alt text-xs md:text-sm"></i></a>` : ''}
+              </div>
+              <div class="absolute top-2 left-2 md:top-3 md:left-3 flex gap-2">
+                <span class="px-2 py-0.5 md:px-3 md:py-1 bg-white/90 backdrop-blur shadow-sm rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-slate-700">${proj.type}</span>
+              </div>
+            </div>
+            <h3 class="font-bold text-base md:text-lg text-slate-900 mb-0.5 md:mb-1 px-0.5 md:px-1 truncate">${escapeHtml(proj.name)}</h3>
+            <p class="text-slate-500 text-xs md:text-sm line-clamp-2 px-0.5 md:px-1 mb-3 md:mb-6">${escapeHtml(proj.description || 'No description provided')}</p>
+            
+            <div class="flex items-center justify-between pt-3 md:pt-4 border-t border-slate-100 px-0.5 md:px-1">
+               <span class="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[11px] font-bold text-slate-400">
+                  <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${proj.visibility === 'public' ? 'bg-emerald-400' : 'bg-amber-400'}"></span>
+                  ${proj.visibility.toUpperCase()}
+               </span>
+               <button data-slug="${proj.slug}" class="deleteProjectBtn text-slate-300 hover:text-red-500 transition-colors text-xs md:text-sm">
+                  <i class="fas fa-trash-alt"></i>
+               </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('newProjectBtn').onclick = () => openProjectModal();
+      document.querySelectorAll('.editProjectBtn').forEach(btn => btn.onclick = () => openProjectModal(btn.dataset.slug));
+      document.querySelectorAll('.deleteProjectBtn').forEach(btn => btn.onclick = async () => {
+          if (confirm('Permanently delete this project?')) {
+              await fetchWithAuth(`${API_BASE}/projects?action=delete`, { method: 'DELETE', body: JSON.stringify({ project_slug: btn.dataset.slug }) });
+              showToast('Project removed'); renderProjects();
+          }
+      });
     }
 
-    function renderPortfolioFromJSON(user, projects) {
-      const app = document.getElementById('app');
-      const totalProjects = projects.length;
-      const hostedCount = projects.filter(p => p.type === 'hosted').length;
-      const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '2024';
+    async function openProjectModal(slug = null) {
+      let project = null;
+      if (slug) {
+        const res = await fetchWithAuth(`${API_BASE}/projects?action=list`);
+        const { projects } = await res.json();
+        project = projects.find(p => p.slug === slug);
+      }
 
-      app.innerHTML = `
-        <div class="max-w-7xl mx-auto px-6 py-8 md:py-12">
-          
-          <!-- Hero Section - Balanced Layout -->
-          <div class="glass-card p-6 md:p-10 mb-12 animate-up">
-            <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
-              
-              <!-- Avatar Column -->
-              <div class="flex justify-center lg:justify-start">
-                <div class="relative group">
-                  <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                  <img src="${user.icon || ''}" 
-                       class="relative w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-2 border-indigo-500/30 shadow-2xl"
-                       onerror="this.src='https://ui-avatars.com/api/?name=${user.user_tag}&background=6366f1&color=fff&size=200&bold=true'">
-                </div>
-              </div>
-              
-              <!-- Info Column -->
-              <div class="flex-1 text-center lg:text-left">
-                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
-                  <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">${escapeHtml(user.user_tag)}</h1>
-                  <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full text-xs font-semibold">
-                    <i class="fas fa-check-circle mr-1 text-xs"></i>Verified
-                  </span>
-                </div>
-                
-                <p class="text-slate-400 text-base md:text-lg mb-6 max-w-2xl leading-relaxed">
-                  ${escapeHtml(user.description || 'Creative developer passionate about building exceptional digital experiences.')}
-                </p>
-                
-                <!-- Stats Grid - Balanced -->
-                <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
-                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
-                    <i class="fas fa-calendar-alt text-indigo-400 text-sm"></i>
-                    <span class="text-sm">Joined ${joinDate}</span>
-                  </div>
-                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
-                    <i class="fas fa-layer-group text-purple-400 text-sm"></i>
-                    <span class="text-sm">${totalProjects} Projects</span>
-                  </div>
-                  <div class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2">
-                    <i class="fas fa-code text-cyan-400 text-sm"></i>
-                    <span class="text-sm">${hostedCount} Hosted</span>
-                  </div>
-                  <button onclick="copyUrl()" class="glass-card-light px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/5 transition group">
-                    <i class="fas fa-link text-emerald-400 text-sm group-hover:text-emerald-300"></i>
-                    <span class="text-sm">Share Profile</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Projects Section - Balanced Grid -->
-          <div class="animate-up" style="animation-delay: 0.15s">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
-              <div>
-                <h2 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
-                  <span class="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></span>
-                  Featured Work
-                </h2>
-                <p class="text-slate-500 text-sm mt-2">Explore projects and creations</p>
-              </div>
-              
-              ${totalProjects > 0 ? `
-                <div class="flex gap-2 p-1 bg-slate-800/50 rounded-xl">
-                  <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">All</button>
-                  <button onclick="filterProjects('hosted')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Hosted</button>
-                  <button onclick="filterProjects('link')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Links</button>
-                  <button onclick="filterProjects('image')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 transition whitespace-nowrap">Images</button>
-                </div>
-              ` : ''}
+      const modalHtml = `
+        <div id="projectModal" class="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-6 modal-overlay">
+          <div class="bg-white rounded-2xl md:rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl p-5 md:p-10">
+            <div class="flex justify-between items-center mb-5 md:mb-8">
+                <h2 class="text-xl md:text-3xl font-extrabold text-slate-900">${project ? 'Edit Project' : 'New Project'}</h2>
+                <button id="closeModalBtn" class="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"><i class="fas fa-times"></i></button>
             </div>
             
-            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              ${totalProjects > 0 ? projects.map((project, index) => `
-                <div class="project-card rounded-2xl overflow-hidden group cursor-pointer flex flex-col h-full" 
-                     data-type="${project.type}" 
-                     onclick="viewProject('${project.user_id}', '${project.slug}')"
-                     style="animation: fadeIn 0.5s ease-out ${index * 0.05}s forwards">
-                  
-                  <!-- Image Container -->
-                  <div class="project-image relative h-48">
-                    <img src="${project.image}" 
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                         onerror="this.src='https://picsum.photos/400/240?random=${index}'">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
-                    
-                    <!-- Type Badge -->
-                    <div class="absolute top-3 left-3">
-                      <span class="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-lg text-xs font-medium border border-white/10">
-                        ${project.type === 'hosted' ? '<i class="fas fa-code mr-1 text-xs"></i> Hosted' : 
-                          project.type === 'link' ? '<i class="fas fa-link mr-1 text-xs"></i> Link' : 
-                          '<i class="fas fa-image mr-1 text-xs"></i> Image'}
-                      </span>
-                    </div>
+            <div class="grid grid-cols-1 gap-4 md:gap-6">
+              <div class="space-y-1 md:space-y-2">
+                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Name</label>
+                <input id="projName" type="text" placeholder="e.g. My Portfolio" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base" value="${escapeHtml(project?.name || '')}">
+              </div>
+
+              <div class="space-y-1 md:space-y-2">
+                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Description</label>
+                <textarea id="projDesc" placeholder="What is this project about?" rows="3" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">${escapeHtml(project?.description || '')}</textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 md:gap-4">
+                  <div class="space-y-1 md:space-y-2">
+                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Project Type</label>
+                    <select id="projType" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">
+                        <option value="image" ${project?.type === 'image' ? 'selected' : ''}>Image/Gallery</option>
+                        <option value="hosted" ${project?.type === 'hosted' ? 'selected' : ''}>Hosted Web Page</option>
+                        <option value="link" ${project?.type === 'link' ? 'selected' : ''}>External Redirect</option>
+                    </select>
                   </div>
-                  
-                  <!-- Content -->
-                  <div class="p-5 flex flex-col flex-1">
-                    <h3 class="font-bold text-lg mb-2 line-clamp-1 group-hover:text-indigo-400 transition">${escapeHtml(project.name)}</h3>
-                    <p class="text-slate-400 text-sm line-clamp-2 mb-4 flex-1">${escapeHtml(project.description || 'No description available.')}</p>
-                    
-                    <div class="flex items-center justify-between pt-3 border-t border-white/5">
-                      <span class="text-xs text-slate-500">
-                        <i class="far fa-calendar-alt mr-1"></i>
-                        ${new Date(project.created_at).toLocaleDateString()}
-                      </span>
-                      <span class="text-indigo-400 text-sm font-medium group-hover:translate-x-1 transition inline-flex items-center gap-1">
-                        Explore <i class="fas fa-arrow-right text-xs"></i>
-                      </span>
-                    </div>
+                  <div class="space-y-1 md:space-y-2">
+                    <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">Visibility</label>
+                    <select id="projVisibility" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm md:text-base">
+                        <option value="public" ${project?.visibility === 'public' ? 'selected' : ''}>🌍 Public</option>
+                        <option value="private" ${project?.visibility === 'private' ? 'selected' : ''}>🔒 Private</option>
+                    </select>
                   </div>
+              </div>
+
+              <div id="hostedContentDiv" class="${project?.type === 'hosted' ? '' : 'hidden'} space-y-1 md:space-y-2">
+                <label class="text-xs md:text-sm font-bold text-slate-700 ml-1">HTML/Source Code</label>
+                <textarea id="projContent" rows="6" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">${escapeHtml(project?.content || '<div>Hello World</div>')}</textarea>
+              </div>
+            </div>
+
+            <button id="saveProjectBtn" class="w-full btn-primary text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-bold mt-6 md:mt-10 shadow-lg text-sm md:text-base">
+                ${project ? 'Update Changes' : 'Launch Project'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      const modal = document.getElementById('projectModal');
+      const typeSelect = document.getElementById('projType');
+      const hostedDiv = document.getElementById('hostedContentDiv');
+
+      typeSelect.onchange = () => hostedDiv.classList.toggle('hidden', typeSelect.value !== 'hosted');
+
+      document.getElementById('saveProjectBtn').onclick = async () => {
+        const projectData = {
+          name: document.getElementById('projName').value,
+          description: document.getElementById('projDesc').value,
+          type: typeSelect.value,
+          visibility: document.getElementById('projVisibility').value,
+          content: document.getElementById('projContent').value
+        };
+
+        if (project) {
+          await fetchWithAuth(`${API_BASE}/projects?action=edit`, { method: 'POST', body: JSON.stringify({ project_slug: project.slug, field: 'name', value: projectData.name }) });
+          showToast('Updated successfully');
+        } else {
+          await fetchWithAuth(`${API_BASE}/projects?action=create`, { method: 'POST', body: JSON.stringify(projectData) });
+          showToast('Project Created');
+        }
+        modal.remove(); renderProjects();
+      };
+
+      document.getElementById('closeModalBtn').onclick = () => modal.remove();
+    }
+
+    async function renderPortfolio() {
+      const container = document.getElementById('dashboardContent');
+      const response = await fetchWithAuth(`${API_BASE}/auth?action=portfolio`, { method: 'POST', body: JSON.stringify({ subaction: 'get' }) });
+      const { portfolio = { type: 'none' } } = await response.json();
+
+      container.innerHTML = `
+        <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-6 md:mb-10">Portfolio Settings</h1>
+        <div class="bg-white rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm p-5 md:p-10 max-w-3xl">
+          <div class="mb-6 md:mb-10">
+            <label class="block text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-3">Portfolio Display Mode</label>
+            <div class="grid grid-cols-3 gap-2 md:gap-4">
+                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'none' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('none')">
+                    <i class="fas fa-file-code mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
+                    <p class="text-[10px] md:text-xs font-bold">API Only</p>
                 </div>
-              `).join('') : `
-                <div class="col-span-full py-16 text-center">
-                  <div class="glass-card-light p-12 max-w-md mx-auto">
-                    <i class="fas fa-palette text-5xl text-slate-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">No Projects Yet</h3>
-                    <p class="text-slate-500 text-sm">This creator hasn't shared any public projects yet.</p>
-                  </div>
+                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'hosted' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('hosted')">
+                    <i class="fas fa-window-maximize mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
+                    <p class="text-[10px] md:text-xs font-bold">Hosted Site</p>
                 </div>
-              `}
+                <div class="mode-card p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all ${portfolio.type === 'redirect' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100'}" onclick="setPortfolioType('redirect')">
+                    <i class="fas fa-route mb-1 md:mb-2 text-indigo-500 text-sm md:text-base"></i>
+                    <p class="text-[10px] md:text-xs font-bold">Redirect</p>
+                </div>
             </div>
           </div>
+          
+          <div id="hostedArea" class="${portfolio.type === 'hosted' ? '' : 'hidden'} mb-6 md:mb-10">
+            <label class="block text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-3">Custom HTML Portfolio</label>
+            <textarea id="hostedContent" rows="12" class="w-full px-4 py-3 md:px-5 md:py-4 bg-slate-900 text-indigo-300 font-mono text-xs border-none rounded-xl md:rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">${escapeHtml(portfolio.content || '<h1>My Site</h1>')}</textarea>
+          </div>
 
-          <!-- Footer - Minimal & Balanced -->
-          <footer class="mt-20 pt-8 border-t border-white/5 text-center">
-            <div class="flex flex-wrap justify-center gap-6 text-sm text-slate-500 mb-4">
-              <a href="/" class="hover:text-indigo-400 transition">Home</a>
-              <a href="/login" class="hover:text-indigo-400 transition">Get Started</a>
-              <a href="/docs" class="hover:text-indigo-400 transition">Documentation</a>
-              <a href="#" class="hover:text-indigo-400 transition">Privacy</a>
-            </div>
-            <p class="text-xs text-slate-600">
-              <i class="fas fa-bolt mr-1 text-indigo-500"></i> Powered by Exploits — Portfolio platform for creators
-            </p>
-          </footer>
+          <button id="savePortfolioBtn" class="btn-primary text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-base">Update Portfolio</button>
         </div>
       `;
     }
 
-    // Helper Functions
-    window.filterProjects = function(type) {
-      // Update active button state
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.add('text-slate-400');
-        if ((type === 'all' && btn.textContent.trim() === 'All') || 
-            (type !== 'all' && btn.textContent.trim().toLowerCase() === type)) {
-          btn.classList.add('active');
-          btn.classList.remove('text-slate-400');
-        }
-      });
+    async function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+      const activeEl = document.querySelector(`[data-tab="${tab}"]`);
+      if(activeEl) activeEl.classList.add('active');
+      
+      // Close mobile menu after selection
+      if (window.innerWidth < 768) closeMobileMenu();
 
-      // Filter projects
-      document.querySelectorAll('.project-card').forEach(card => {
-        if (type === 'all' || card.dataset.type === type) {
-          card.style.display = 'flex';
-          card.style.opacity = '1';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    };
-
-    window.viewProject = function(userId, projectSlug) {
-      window.location.href = `/project/${userId}/${projectSlug}`;
-    };
-
-    window.copyUrl = function() {
-      const url = window.location.href;
-      navigator.clipboard.writeText(url).then(() => {
-        const btn = event.currentTarget;
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check text-emerald-400 text-sm"></i><span class="text-sm">Copied!</span>';
-        setTimeout(() => {
-          btn.innerHTML = originalHtml;
-        }, 2000);
-      });
-    };
+      if (tab === 'projects') await renderProjects();
+      else if (tab === 'portfolio') await renderPortfolio();
+      else if (tab === 'analytics') document.getElementById('dashboardContent').innerHTML = '<h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Analytics</h1><div class="py-12 md:py-20 text-center glass-card rounded-2xl md:rounded-[2.5rem]"><i class="fas fa-chart-line text-3xl md:text-4xl text-slate-200 mb-3 md:mb-4"></i><p class="text-slate-500 font-medium text-sm md:text-base">Tracking data will appear here shortly.</p></div>';
+      else if (tab === 'profile') document.getElementById('dashboardContent').innerHTML = '<h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 mb-6 md:mb-10">Profile</h1><div class="glass-card rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 max-w-2xl"><div class="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-slate-100 mb-4 md:mb-6"></div><div class="h-8 md:h-10 w-32 md:w-48 bg-slate-100 rounded-lg md:rounded-xl mb-3 md:mb-4"></div><div class="h-20 md:h-32 w-full bg-slate-50 rounded-xl md:rounded-2xl"></div></div>';
+    }
 
     function escapeHtml(text) {
-      if (!text) return '';
       const div = document.createElement('div');
-      div.textContent = text;
+      div.textContent = text || '';
       return div.innerHTML;
     }
 
     async function init() {
-      const userSlug = getUserSlug();
-      if (!userSlug) {
-        renderError('No user specified. Please provide a valid username.');
-        return;
-      }
-
-      try {
-        const user = await fetchUserData(userSlug);
-        const projects = await fetchUserProjects(userSlug);
-        renderPortfolioFromJSON(user, projects);
-        document.title = `${user.user_tag} | Portfolio - Exploits`;
-      } catch (error) {
-        console.error('Error:', error);
-        renderError(error.message === 'User not found' 
-          ? `User "${userSlug}" doesn't exist.` 
-          : 'Unable to load portfolio. Please try again later.');
-      }
+      await loadUserProfile();
+      
+      // Mobile menu handlers
+      const menuBtn = document.getElementById('menuBtn');
+      const closeBtn = document.getElementById('closeSidebarBtn');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (menuBtn) menuBtn.onclick = openMobileMenu;
+      if (closeBtn) closeBtn.onclick = closeMobileMenu;
+      if (overlay) overlay.onclick = closeMobileMenu;
+      
+      document.querySelectorAll('[data-tab]').forEach(item => {
+        item.onclick = () => switchTab(item.dataset.tab);
+      });
+      document.getElementById('logoutBtn').onclick = () => { localStorage.clear(); window.location.href = '/login'; };
+      await switchTab('projects');
     }
 
     init();
