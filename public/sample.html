@@ -3,10 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Exploits — Portfolio Hub for Devs & Designers</title>
-  <!-- Tailwind + Google Fonts + simple CSS -->
+  
+  <!-- Primary Meta Tags -->
+  <title>Exploits — Portfolio Hub for Developers & Designers | Host HTML Projects, Track Analytics</title>
+  <meta name="title" content="Exploits — Portfolio Hub for Developers & Designers">
+  <meta name="description" content="Build, host, and dominate your creative identity. The all-in-one portfolio suite for developers and designers. Host HTML projects, track analytics, and craft stunning profiles with zero lock-in.">
+  <meta name="keywords" content="portfolio, developer portfolio, designer portfolio, HTML hosting, project analytics, creative portfolio, web developer, freelance portfolio, code portfolio, design portfolio">
+  <meta name="author" content="Exploits">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+  <meta name="revisit-after" content="7 days">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://myexploits.vercel.app/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://myexploits.vercel.app/">
+  <meta property="og:title" content="Exploits — Portfolio Hub for Developers & Designers">
+  <meta property="og:description" content="Build, host, and dominate your creative identity. Host HTML projects, track analytics, and craft stunning portfolios with zero lock-in.">
+  <meta property="og:image" content="https://myexploits.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Exploits">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://myexploits.vercel.app/">
+  <meta property="twitter:title" content="Exploits — Portfolio Hub for Developers & Designers">
+  <meta property="twitter:description" content="Build, host, and dominate your creative identity. Host HTML projects, track analytics, and craft stunning portfolios with zero lock-in.">
+  <meta property="twitter:image" content="https://myexploits.vercel.app/twitter-image.png">
+  
+  <!-- Additional Meta Tags -->
+  <meta name="application-name" content="Exploits">
+  <meta name="apple-mobile-web-app-title" content="Exploits">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#3B82F6">
+  
+  <!-- Favicon and Icons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  <!-- Schema.org markup for Google+ -->
+  <meta itemprop="name" content="Exploits — Portfolio Hub for Developers & Designers">
+  <meta itemprop="description" content="Build, host, and dominate your creative identity. The all-in-one portfolio suite for developers and designers.">
+  <meta itemprop="image" content="https://myexploits.vercel.app/schema-image.png">
+  
+  <!-- Tailwind + Google Fonts + CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- custom config to match modern aesthetic -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
     * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -34,20 +81,6 @@
       border-radius: 24px;
       box-shadow: 0 25px 45px -12px rgba(0,0,0,0.35);
     }
-    .code-block {
-      background: #1e1f29;
-      border-radius: 18px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .gradient-border {
-      background: linear-gradient(135deg, #3B82F6, #A855F7);
-      padding: 1px;
-      border-radius: 2rem;
-    }
-    .demo-modal-bg {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(8px);
-    }
     @keyframes float-slow {
       0% { transform: translateY(0px); }
       100% { transform: translateY(-12px); }
@@ -55,7 +88,44 @@
     .float-element {
       animation: float-slow 4s ease-in-out infinite alternate;
     }
+    
+    /* JSON-LD Structured Data */
+    .structured-data {
+      display: none;
+    }
   </style>
+  
+  <!-- JSON-LD Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Exploits",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "description": "Portfolio management platform for developers and designers to host HTML projects, track analytics, and create stunning portfolios.",
+    "url": "https://myexploits.vercel.app/",
+    "screenshot": "https://myexploits.vercel.app/og-image.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Exploits",
+      "url": "https://myexploits.vercel.app/"
+    },
+    "featureList": [
+      "Hosted HTML/CSS/JS Projects",
+      "Built-in Analytics",
+      "JWT Authentication",
+      "Public Portfolio Routes",
+      "Project Management",
+      "Privacy-First Tracking"
+    ]
+  }
+  </script>
 </head>
 <body class="antialiased">
 
@@ -72,11 +142,11 @@
         <a href="#features" class="hover:text-blue-600 transition">Features</a>
         <a href="#demos" class="hover:text-blue-600 transition">Live demos</a>
         <a href="#showcase" class="hover:text-blue-600 transition">Showcase</a>
-        <a href="#" class="hover:text-blue-600 transition">Docs</a>
+        <a href="/docs" class="hover:text-blue-600 transition">Docs</a>
       </div>
       <div class="flex gap-3">
-        <a href="https://myexploits.vercel.app/api/auth?action=login" class="hidden md:block px-5 py-2 rounded-full text-gray-700 font-medium hover:bg-gray-100 transition">Sign in</a>
-        <a href="https://myexploits.vercel.app/api/auth?action=create" class="px-5 py-2 rounded-full bg-gray-900 text-white font-semibold shadow-md hover:bg-gray-800 transition">Create account</a>
+        <a href="/login" class="hidden md:block px-5 py-2 rounded-full text-gray-700 font-medium hover:bg-gray-100 transition">Sign in</a>
+        <a href="/login" class="px-5 py-2 rounded-full bg-gray-900 text-white font-semibold shadow-md hover:bg-gray-800 transition">Create account</a>
       </div>
     </div>
   </nav>
@@ -100,8 +170,8 @@
           Host HTML projects, track analytics, and craft stunning profiles — no lock‑in.
         </p>
         <div class="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
-          <a href="#demos" class="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">Explore live demos →</a>
-          <a href="https://myexploits.vercel.app/portfolio/demo" class="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-800 font-medium hover:bg-gray-50 transition">See portfolio URL</a>
+          <a href="/login" class="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">Get Started Free →</a>
+          <a href="#demos" class="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-800 font-medium hover:bg-gray-50 transition">View Live Demos</a>
         </div>
         <div class="flex flex-wrap gap-6 mt-12 text-sm text-gray-500 justify-center lg:justify-start">
           <div class="flex items-center gap-2">✨ <span>Hosted HTML/CSS/JS</span></div>
@@ -146,7 +216,7 @@
         <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
           <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl mb-4">📁</div>
           <h3 class="text-xl font-bold">Hosted projects + full HTML</h3>
-          <p class="text-gray-500 mt-2">Deploy interactive demos, three.js scenes, or design prototypes. Each project gets a unique /:userId/:slug URL.</p>
+          <p class="text-gray-500 mt-2">Deploy interactive demos, three.js scenes, or design prototypes. Each project gets a unique URL.</p>
         </div>
         <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
           <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-2xl mb-4">📈</div>
@@ -166,7 +236,7 @@
         <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
           <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-2xl mb-4">🌐</div>
           <h3 class="text-xl font-bold">Public portfolio routes</h3>
-          <p class="text-gray-500 mt-2">Share your tag: <span class="font-mono text-blue-600">myexploits.vercel.app/username</span> — instant web presence.</p>
+          <p class="text-gray-500 mt-2">Share your tag: <span class="font-mono text-blue-600">myexploits.vercel.app/portfolio?user_slug=username</span> — instant web presence.</p>
         </div>
         <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
           <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl mb-4">🛠️</div>
@@ -236,7 +306,7 @@
               <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Minimal profile</strong> – show icon + bio + coming soon</li>
             </ul>
             <div class="mt-5 p-3 bg-gray-100 rounded-xl text-sm font-mono">
-              <span class="text-gray-500">GET</span> https://myexploits.vercel.app/portfolio/designwiz<br/>
+              <span class="text-gray-500">GET</span> https://myexploits.vercel.app/portfolio?user_slug=designwiz<br/>
               → returns hosted portfolio or redirect
             </div>
           </div>
@@ -292,15 +362,15 @@
       </div>
       <div class="grid md:grid-cols-3 gap-7">
         <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/26/400/220" alt="demo" class="w-full h-40 object-cover">
+          <img src="https://picsum.photos/id/26/400/220" alt="Motion Lab portfolio showcase - hosted three.js experiments" class="w-full h-40 object-cover">
           <div class="p-5"><div class="font-bold">@motion_lab</div><p class="text-gray-500 text-sm">Hosted portfolio with three.js + WebGL experiments. Gets 240 unique visitors/week.</p><div class="flex mt-2 text-xs text-blue-500">🔗 hosted project active</div></div>
         </div>
         <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/1/400/220" alt="demo" class="w-full h-40 object-cover">
+          <img src="https://picsum.photos/id/1/400/220" alt="UX Sage portfolio - redirect setup with analytics" class="w-full h-40 object-cover">
           <div class="p-5"><div class="font-bold">@ux_sage</div><p class="text-gray-500 text-sm">Redirect portfolio → personal site, analytics show 67% traffic from Dribbble.</p><div class="flex mt-2 text-xs text-purple-500">📊 analytics enabled</div></div>
         </div>
         <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-          <img src="https://picsum.photos/id/169/400/220" alt="demo" class="w-full h-40 object-cover">
+          <img src="https://picsum.photos/id/169/400/220" alt="Code Witch portfolio - multiple hosted projects showcase" class="w-full h-40 object-cover">
           <div class="p-5"><div class="font-bold">@codewitch</div><p class="text-gray-500 text-sm">5 hosted projects (react playground, canvas game, design system). total visits 1.2k+</p><div class="flex mt-2 text-xs text-green-600">✨ full HTML customisation</div></div>
         </div>
       </div>
@@ -313,8 +383,8 @@
       <h2 class="text-4xl md:text-5xl font-bold">Ready to launch your portfolio?</h2>
       <p class="text-gray-300 text-lg mt-4">Join developers and designers who own their creative footprint. Zero lock‑in, full control.</p>
       <div class="flex flex-wrap justify-center gap-5 mt-10">
-        <a href="https://myexploits.vercel.app/api/auth?action=create" class="px-8 py-3 rounded-full bg-white text-gray-900 font-bold shadow-xl hover:bg-gray-100 transition">Get started free</a>
-        <a href="#" class="px-8 py-3 rounded-full border border-white/30 text-white font-medium hover:bg-white/10 transition">Read documentation</a>
+        <a href="/login" class="px-8 py-3 rounded-full bg-white text-gray-900 font-bold shadow-xl hover:bg-gray-100 transition">Get started free</a>
+        <a href="/docs" class="px-8 py-3 rounded-full border border-white/30 text-white font-medium hover:bg-white/10 transition">Read documentation</a>
       </div>
       <p class="text-sm text-gray-400 mt-8">✨ No credit card • full API access • Firebase backend</p>
     </div>
@@ -325,9 +395,9 @@
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
       <span>© 2025 Exploits — portfolio infrastructure for creatives</span>
       <div class="flex gap-6">
-        <a href="#" class="hover:text-gray-900">Privacy</a>
-        <a href="#" class="hover:text-gray-900">Terms</a>
-        <a href="#" class="hover:text-gray-900">GitHub</a>
+        <a href="/privacy" class="hover:text-gray-900">Privacy</a>
+        <a href="/terms" class="hover:text-gray-900">Terms</a>
+        <a href="https://github.com/exploits" class="hover:text-gray-900">GitHub</a>
       </div>
     </div>
   </footer>
@@ -355,7 +425,7 @@
       const contentEl = document.getElementById('modalContent');
       if (type === 'galaxy') {
         titleEl.innerText = '🌌 hosted project preview (galaxy-explorer)';
-        contentEl.innerHTML = `<div class="bg-gray-900 rounded-xl p-4 text-white text-center"><div class="text-4xl mb-2">✨🌀✨</div><p class="text-sm">Interactive 3D scene loaded from Exploits hosted project. Full JavaScript/Three.js allowed.<br><span class="text-xs text-gray-400">URL: /portfolio/maker/galaxy-explorer</span></p><div class="mt-3 flex justify-center gap-2"><span class="bg-blue-500/30 px-2 py-1 rounded-full text-xs">click & drag</span><span class="bg-purple-500/30 px-2 py-1 rounded-full text-xs">live demo</span></div></div><p class="mt-3 text-xs text-gray-500">CSP allows scripts/styles — fully functional HTML/CSS/JS sandbox.</p>`;
+        contentEl.innerHTML = `<div class="bg-gray-900 rounded-xl p-4 text-white text-center"><div class="text-4xl mb-2">✨🌀✨</div><p class="text-sm">Interactive 3D scene loaded from Exploits hosted project. Full JavaScript/Three.js allowed.<br><span class="text-xs text-gray-400">URL: /portfolio?user_slug=maker&project=galaxy-explorer</span></p><div class="mt-3 flex justify-center gap-2"><span class="bg-blue-500/30 px-2 py-1 rounded-full text-xs">click & drag</span><span class="bg-purple-500/30 px-2 py-1 rounded-full text-xs">live demo</span></div></div><p class="mt-3 text-xs text-gray-500">CSP allows scripts/styles — fully functional HTML/CSS/JS sandbox.</p>`;
       } else if (type === 'apiDemo') {
         titleEl.innerText = '⚡ API response simulation';
         contentEl.innerHTML = `<pre class="bg-gray-800 text-green-300 p-3 rounded-lg text-xs overflow-auto">{
