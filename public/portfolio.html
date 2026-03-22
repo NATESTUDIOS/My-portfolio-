@@ -9,37 +9,27 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
     * { font-family: 'Inter', system-ui, sans-serif; }
-    
+
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
     }
-    
+
     .glass-card {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-radius: 2rem;
     }
-    
+
     .project-card {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .project-card:hover {
       transform: translateY(-8px);
       box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.25);
     }
-    
-    .skill-tag {
-      transition: all 0.2s;
-    }
-    
-    .skill-tag:hover {
-      transform: scale(1.05);
-      background: #3b82f6;
-      color: white;
-    }
-    
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -50,20 +40,9 @@
         transform: translateY(0);
       }
     }
-    
+
     .fade-in {
       animation: fadeIn 0.6s ease-out;
-    }
-    
-    .skeleton {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-    }
-    
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
     }
   </style>
 </head>
@@ -80,54 +59,64 @@
 
   <script>
     const API_BASE = 'https://myexploits.vercel.app/api';
-    
+
     // Get user_slug from URL query parameter
     function getUserSlug() {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('user_slug');
     }
-    
-    // Fetch user data from auth API
+
+    // Fetch user data from auth API using the new profile endpoint
     async function fetchUserData(userSlug) {
       try {
-        const response = await fetch(`${API_BASE}/auth?user_tag=${userSlug}`);
+        // Using the new profile endpoint that returns complete user data
+        const response = await fetch(`${API_BASE}/auth?action=profile&user_tag=${userSlug}`);
+        
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('User not found');
           }
-          throw new Error('Failed to fetch user data');
+          throw new Error(`Failed to fetch user data: ${response.status}`);
         }
-        return await response.json();
+        
+        const data = await response.json();
+        console.log('User data loaded:', data);
+        return data;
       } catch (error) {
+        console.error('Error fetching user data:', error);
         throw error;
       }
     }
-    
+
     // Fetch user's public projects
     async function fetchUserProjects(userSlug) {
       try {
         const response = await fetch(`${API_BASE}/projects?action=public&user_tag=${userSlug}`);
+        
         if (!response.ok) {
+          console.warn('Projects API returned:', response.status);
           return []; // Return empty array if no projects or error
         }
+        
         const data = await response.json();
+        console.log('Projects loaded:', data.projects?.length || 0, 'projects');
         return data.projects || [];
       } catch (error) {
         console.error('Error fetching projects:', error);
         return [];
       }
     }
-    
+
     // Track portfolio visit
     async function trackVisit(userId, userSlug) {
       try {
-        // You can add analytics tracking here if needed
         console.log(`Portfolio visited: @${userSlug} (${userId})`);
+        // You can add analytics tracking here if needed
       } catch (error) {
         console.error('Tracking error:', error);
       }
     }
-    
+
     // Render error state
     function renderError(message) {
       const app = document.getElementById('app');
@@ -138,7 +127,7 @@
               <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Oops!</h2>
-            <p class="text-gray-600 mb-6">${message}</p>
+            <p class="text-gray-600 mb-6">${escapeHtml(message)}</p>
             <div class="space-y-3">
               <a href="/" class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition">
                 <i class="fas fa-home mr-2"></i> Return Home
@@ -151,38 +140,49 @@
         </div>
       `;
     }
-    
+
     // Render portfolio based on type
     async function renderPortfolio(user, projects) {
       const portfolio = user.portfolio || { type: 'none' };
-      
+
       // Handle hosted portfolio
-      if (portfolio.type === 'hosted' && portfolio.content) {
-        document.getElementById('app').innerHTML = portfolio.content;
-        trackVisit(user.userId, user.user_tag);
-        return;
+      if (portfolio.type === 'hosted') {
+        // For hosted portfolios, we need to fetch the actual HTML content
+        // from the original endpoint that returns the full HTML
+        try {
+          const hostedResponse = await fetch(`${API_BASE}/auth?user_tag=${user.user_tag}`);
+          if (hostedResponse.ok) {
+            const html = await hostedResponse.text();
+            document.getElementById('app').innerHTML = html;
+            trackVisit(user.userId, user.user_tag);
+            return;
+          }
+        } catch (error) {
+          console.error('Error loading hosted portfolio:', error);
+          // Fall through to minimal profile
+        }
       }
-      
+
       // Handle redirect portfolio
       if (portfolio.type === 'redirect' && portfolio.redirect_url) {
         window.location.href = portfolio.redirect_url;
         return;
       }
-      
+
       // Render minimal profile (default)
       renderMinimalProfile(user, projects);
       trackVisit(user.userId, user.user_tag);
     }
-    
+
     // Render minimal profile with projects grid
     function renderMinimalProfile(user, projects) {
       const app = document.getElementById('app');
-      
+
       // Calculate stats
       const totalProjects = projects.length;
       const hostedProjects = projects.filter(p => p.type === 'hosted').length;
       const publicProjects = projects.filter(p => p.visibility === 'public').length;
-      
+
       app.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <!-- Hero Section -->
@@ -212,7 +212,7 @@
                 <div class="flex flex-wrap gap-4 justify-center md:justify-start">
                   <div class="flex items-center gap-2 text-gray-600">
                     <i class="fas fa-calendar-alt text-blue-500"></i>
-                    <span class="text-sm">Joined ${new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                    <span class="text-sm">Joined ${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}</span>
                   </div>
                   <div class="flex items-center gap-2 text-gray-600">
                     <i class="fas fa-folder-open text-purple-500"></i>
@@ -231,7 +231,7 @@
                 <!-- Portfolio URL Badge -->
                 <div class="mt-4 inline-flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
                   <i class="fas fa-link text-gray-500 text-sm"></i>
-                  <code class="text-xs text-gray-600">exploits.vercel.app/portfolio?user_slug=${user.user_tag}</code>
+                  <code class="text-xs text-gray-600">myexploits.vercel.app/portfolio?user_slug=${user.user_tag}</code>
                   <button onclick="copyUrl()" class="text-blue-500 hover:text-blue-600 text-sm ml-2">
                     <i class="fas fa-copy"></i>
                   </button>
@@ -253,17 +253,19 @@
               <h2 class="text-2xl md:text-3xl font-bold text-white">
                 <i class="fas fa-code mr-3"></i>Featured Projects
               </h2>
-              <div class="flex gap-2">
-                <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-lg bg-white/20 backdrop-blur text-white text-sm font-medium hover:bg-white/30 transition">
-                  All
-                </button>
-                <button onclick="filterProjects('hosted')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
-                  Hosted
-                </button>
-                <button onclick="filterProjects('link')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
-                  Links
-                </button>
-              </div>
+              ${projects.length > 0 ? `
+                <div class="flex gap-2">
+                  <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-lg bg-white/20 backdrop-blur text-white text-sm font-medium hover:bg-white/30 transition">
+                    All
+                  </button>
+                  <button onclick="filterProjects('hosted')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
+                    Hosted
+                  </button>
+                  <button onclick="filterProjects('link')" class="filter-btn px-4 py-2 rounded-lg bg-white/10 backdrop-blur text-white/80 text-sm font-medium hover:bg-white/20 transition">
+                    Links
+                  </button>
+                </div>
+              ` : ''}
             </div>
             
             <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -314,18 +316,18 @@
             <div class="flex gap-4 justify-center mt-3">
               <a href="/" class="hover:text-white transition">Home</a>
               <a href="/login" class="hover:text-white transition">Get Started</a>
-              <a href="#" class="hover:text-white transition">Documentation</a>
+              <a href="/docs" class="hover:text-white transition">Documentation</a>
             </div>
           </div>
         </div>
       `;
     }
-    
+
     // Project filtering
     window.filterProjects = function(type) {
       const projects = document.querySelectorAll('.project-card');
       const buttons = document.querySelectorAll('.filter-btn');
-      
+
       buttons.forEach(btn => {
         btn.classList.remove('active', 'bg-white/20', 'text-white');
         btn.classList.add('bg-white/10', 'text-white/80');
@@ -334,7 +336,7 @@
           btn.classList.remove('bg-white/10', 'text-white/80');
         }
       });
-      
+
       projects.forEach(project => {
         if (type === 'all') {
           project.style.display = 'block';
@@ -345,17 +347,16 @@
         }
       });
     };
-    
+
     // View project detail
     window.viewProject = function(userId, projectSlug) {
       window.location.href = `/project/${userId}/${projectSlug}`;
     };
-    
+
     // Copy URL to clipboard
     window.copyUrl = function() {
       const url = window.location.href;
       navigator.clipboard.writeText(url).then(() => {
-        // Show temporary tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50';
         tooltip.innerHTML = '<i class="fas fa-check mr-2"></i>URL copied to clipboard!';
@@ -363,7 +364,7 @@
         setTimeout(() => tooltip.remove(), 2000);
       });
     };
-    
+
     // Escape HTML to prevent XSS
     function escapeHtml(text) {
       if (!text) return '';
@@ -371,45 +372,61 @@
       div.textContent = text;
       return div.innerHTML;
     }
-    
+
     // Initialize page
     async function init() {
       const userSlug = getUserSlug();
-      
+
       if (!userSlug) {
-        renderError('No user specified. Please provide a valid username.');
+        renderError('No user specified. Please provide a valid username (e.g., ?user_slug=username).');
         return;
       }
-      
+
+      // Show loading with username
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="flex items-center justify-center min-h-screen">
+          <div class="text-center text-white">
+            <i class="fas fa-spinner fa-spin text-5xl mb-4"></i>
+            <p class="text-lg">Loading portfolio for @${escapeHtml(userSlug)}...</p>
+          </div>
+        </div>
+      `;
+
       try {
-        // Fetch user data and projects in parallel
-        const [user, projects] = await Promise.all([
-          fetchUserData(userSlug),
-          fetchUserProjects(userSlug)
-        ]);
+        // Fetch user data using the new profile endpoint
+        const user = await fetchUserData(userSlug);
         
+        // Fetch user's public projects
+        const projects = await fetchUserProjects(userSlug);
+
         // Render portfolio based on user's settings
         await renderPortfolio(user, projects);
-        
+
         // Update page title
         document.title = `${user.user_tag} | Portfolio - Exploits`;
-        
-        // Add meta tags for social sharing
-        const metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-          metaDescription.content = user.description || `Check out ${user.user_tag}'s portfolio on Exploits`;
+
+        // Add or update meta tags for social sharing
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+          metaDescription = document.createElement('meta');
+          metaDescription.name = 'description';
+          document.head.appendChild(metaDescription);
         }
-        
+        metaDescription.content = user.description || `Check out ${user.user_tag}'s portfolio on Exploits`;
+
       } catch (error) {
         console.error('Error:', error);
         if (error.message === 'User not found') {
-          renderError(`User "${userSlug}" doesn't exist or hasn't created a portfolio yet.`);
+          renderError(`User "${escapeHtml(userSlug)}" doesn't exist or hasn't created a portfolio yet.`);
+        } else if (error.message.includes('Failed to fetch')) {
+          renderError('Unable to connect to the server. Please check your internet connection and try again.');
         } else {
           renderError('Unable to load portfolio. Please try again later.');
         }
       }
     }
-    
+
     // Start the app
     init();
   </script>
