@@ -2,334 +2,386 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- ADDED: Font Awesome for icons (only) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- ADDED: Google Fonts for updated typography (Playfair Display & Plus Jakarta Sans) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Exploits — Portfolio Hub for Devs & Designers</title>
+  <!-- Tailwind + Google Fonts + simple CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- custom config to match modern aesthetic -->
   <style>
-    /* 
-      ORIGINAL DESIGN INTACT – only changes:
-      1) updated font-family declarations (typography)
-      2) icons added to header p, cat-grid p, and contact-grid-box (without altering any layout/style)
-      3) no other modifications
-    */
-
-  body {
-  background: #09090B;
-  color: white;
-  padding: 0;
-  margin: 0;
-  /* UPDATED font for body (clean, modern) – but specific elements keep updated faces */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-header {
-  margin: 0;
-  padding: 0;
-  height: 600px;
-  width: 100%;
-  max-height: 700px;
-  position: relative;
-}
-header img {
-  object-fit: cover;
-  height: 600px;
-  width: 100%;
-  display: block;
-}
-.header-img-shadow {
-  height: 600px;
-  width: 100%;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent, #00000055, #000000);
-  grid-area: 1/2;
-  display: flex;
-  align-items: flex-end;
-  justify-content: left;
-  border-bottom: 2px dotted #ffffff55;
-}
-.header-img-shadow-temp {
-  padding: 0 0 10px;
-  margin: 0;
-}
-.header-img-shadow-temp h1 {
-  color: white;
-  padding: 100px 8px 0 10px;
-  margin: 0;
-  /* UPDATED font: bold elegant serif */
-  font-family: 'Playfair Display', serif;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-.header-img-shadow-temp p {
-  color: white;
-  padding: 0 8px 0 10px;
-  margin: 0;
-  /* UPDATED font: clean sans */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-}
-.cat-grid {
-  display: flex;
-  overflow-y: hidden;
-  overflow-x: auto;
-}
-.cat-grid p {
-  padding: 8px 20px 8px;
-  margin: 14px 7px 7px;
-  background: #623E6F55;
-  border: 2px solid #623E6F;
-  color: #EEEEFF;
-  border-radius: 30px;
-  font-size: 11px;
-  /* UPDATED font: semi-bold */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  /* ensure icons inside p are inline */
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-/*status text*/
-.heading-text {
-  /* UPDATED font: bold condensed style */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  padding: 50px 8px 7px;
-  margin: 0;
-  color: #E0E0E0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-/*status grid*/
-
-.status-grid {
-  padding: 0 0 20px 0;
-  display: flex;
-  overflow-y: hidden;
-  overflow-x: auto;
-}
-.status-grid img {
-  height: 190px;
-  width: 140px;
-  object-fit: cover;
-  background: grey;
-  background: linear-gradient(180deg, transparent, #212121, #000000ee);
-  border-radius: 17px;
-  border: 3px solid #ffffff55;
-  margin: 4px 6px;
-}
-/*contact grid*/
-.contact-grid{
-  margin: 0 0 40px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-.contact-grid-box{
-  font-style: none;
-  margin: 8px;
-  padding: 20px;
-  flex-grow: 1;
-  border: 1px solid #ffffff22;
-  background: #623E6F22;
-  border-radius: 17px;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  /* UPDATED font: monospace -> modern rounded sans (but kept monospace fallback) */
-  font-family: 'Plus Jakarta Sans', monospace;
-  font-size: 17px;
-  font-weight: bold;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-decoration: none;
-}
-/* projects as posts */
-
-.projects-grid{
-  
-}
-.project-card{
-  margin: 50px 0 0;
-  background: #141414;
-  position: relative;
-  width: 100%;
-  max-width: 720px;
-  border-bottom: 3px dotted #9e9e9e;
-}
-.post-image{
-  height: 450px;
-  width: 100%;
-  object-fit: cover;
-  display: block;
-}
-.about-project-main{
-  height: 420px;
-  padding: 10px;
-  display: flex;
-  align-items: end;
-  text-align: center;
-  position: absolute;
-  inset: 0;
-}
-.about-project{
-  display: flex;
-  padding: 3px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: absolute;
-  border-radius: 50px;
-  background: #000000c4;
-  border: 2px solid #623E6F;
-}
-.about-project h4{
-  display: flex;
-  padding: 0 12px 0 2px;
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-  /* updated font for consistency */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-}
-.logo-image{
-  height: 30px;
-  width: 30px;
-  margin: 0 2px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid #ffffff22 ;
-  object-fit: cover;
-}
-.project-card p{
-  padding: 8px 7px 15px;
-  margin: 0;
-  /* updated font */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 400;
-}
-/*Call to action that scrolls to the contact-grid-box*/
-
-/* minor addition: icon styling – no layout change */
-i {
-  font-size: 1.1em; 
-  display: inline-block;
-}
-    .credit-footer {
-      text-align: center;
-      padding: 40px 10px 20px;
-      font-family: monospace;
-      color: #444;
-      font-size: 13px;
-      border-top: 1px dashed #623E6F33;
-      margin-top: 20px;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { background: #fefcf7; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,240,0.5);
     }
-    .credit-footer i {
-      color: #7a5d8c;
+    .gradient-text {
+      background: linear-gradient(135deg, #0F172A 0%, #3B82F6 60%, #A855F7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-
-    /* fix for missing phone icon: now using proper FA */
-    .contact-grid-box i {
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      margin-right: 6px;
+    .feature-hover {
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .feature-hover:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+    }
+    .mockup-window {
+      background: #0a0c10;
+      border-radius: 24px;
+      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.35);
+    }
+    .code-block {
+      background: #1e1f29;
+      border-radius: 18px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gradient-border {
+      background: linear-gradient(135deg, #3B82F6, #A855F7);
+      padding: 1px;
+      border-radius: 2rem;
+    }
+    .demo-modal-bg {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+    }
+    @keyframes float-slow {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-12px); }
+    }
+    .float-element {
+      animation: float-slow 4s ease-in-out infinite alternate;
     }
   </style>
-  <title>Fortune's Bio - Take a look</title>
 </head>
-<body>
-  <header>
-    <img src="https://fortportfolio.vercel.app/public/assets/Fort.jpg" alt="fortune background">
-    <div class="header-img-shadow">
-      <div class="header-img-shadow-temp">
-        <h1>Fortune Martins</h1>
-        <!-- ADDED icon to description -->
-        <p>
-          <i class="fas fa-paint-brush" style="margin-right: 6px;"></i> Bringing imagination to reality
+<body class="antialiased">
+
+  <!-- NAVBAR -->
+  <nav class="w-full fixed top-0 z-50 py-4 px-6 md:px-12 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-md">
+          <span class="text-white font-black text-xl">⚡</span>
+        </div>
+        <span class="font-extrabold text-2xl tracking-tight text-gray-800">exploits<span class="text-blue-600">.</span></span>
+      </div>
+      <div class="hidden md:flex gap-8 text-gray-600 font-medium">
+        <a href="#features" class="hover:text-blue-600 transition">Features</a>
+        <a href="#demos" class="hover:text-blue-600 transition">Live demos</a>
+        <a href="#showcase" class="hover:text-blue-600 transition">Showcase</a>
+        <a href="#" class="hover:text-blue-600 transition">Docs</a>
+      </div>
+      <div class="flex gap-3">
+        <a href="https://myexploits.vercel.app/api/auth?action=login" class="hidden md:block px-5 py-2 rounded-full text-gray-700 font-medium hover:bg-gray-100 transition">Sign in</a>
+        <a href="https://myexploits.vercel.app/api/auth?action=create" class="px-5 py-2 rounded-full bg-gray-900 text-white font-semibold shadow-md hover:bg-gray-800 transition">Create account</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="pt-32 pb-20 md:pt-40 md:pb-28 px-6 max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row items-center gap-14">
+      <div class="flex-1 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full text-blue-700 text-sm font-medium mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+          </span>
+          portfolio ecosystem 2.0
+        </div>
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.2] tracking-tight text-gray-900">
+          Build, host & <span class="gradient-text">dominate</span><br>your creative identity.
+        </h1>
+        <p class="text-xl text-gray-500 mt-6 max-w-xl mx-auto lg:mx-0">
+          The all‑in‑one portfolio suite for developers, designers, and makers. 
+          Host HTML projects, track analytics, and craft stunning profiles — no lock‑in.
         </p>
-        <div class="cat-grid">
-          <!-- ADDED icons to each category -->
-          <p><i class="fas fa-pen-fancy"></i> Graphics</p>
-          <p><i class="fas fa-code"></i> Web development</p>
-          <p><i class="fas fa-mobile-alt"></i> App development</p>
+        <div class="flex flex-wrap justify-center lg:justify-start gap-4 mt-10">
+          <a href="#demos" class="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">Explore live demos →</a>
+          <a href="https://myexploits.vercel.app/portfolio/demo" class="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-800 font-medium hover:bg-gray-50 transition">See portfolio URL</a>
+        </div>
+        <div class="flex flex-wrap gap-6 mt-12 text-sm text-gray-500 justify-center lg:justify-start">
+          <div class="flex items-center gap-2">✨ <span>Hosted HTML/CSS/JS</span></div>
+          <div class="flex items-center gap-2">📊 <span>Built‑in analytics</span></div>
+          <div class="flex items-center gap-2">🔗 <span>Redirect or custom code</span></div>
         </div>
       </div>
+      <div class="flex-1 relative">
+        <div class="mockup-window rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
+          <div class="bg-[#0F1117] p-2 flex items-center gap-2 border-b border-gray-800">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="text-gray-400 text-xs ml-2">portfolio preview — @dev_explorer</span>
+          </div>
+          <div class="bg-white p-5 min-h-[320px] flex flex-col items-center justify-center text-center">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 flex items-center justify-center text-white text-3xl shadow-md">🚀</div>
+            <h3 class="text-xl font-bold mt-3 text-gray-800">Alex Rivera</h3>
+            <p class="text-gray-500 text-sm max-w-xs">creative full‑stack dev · interactive storyteller</p>
+            <div class="grid grid-cols-2 gap-3 mt-5 w-full max-w-sm">
+              <div class="bg-gray-100 rounded-xl p-2 text-xs font-mono">✨ three.js demo</div>
+              <div class="bg-gray-100 rounded-xl p-2 text-xs font-mono">⚡ react playground</div>
+            </div>
+            <div class="mt-5 w-full bg-gray-100 rounded-full h-2"></div>
+            <p class="text-xs text-gray-400 mt-3">⚡ hosted project active · 128 visits</p>
+          </div>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-blue-200 rounded-full blur-3xl opacity-40 -z-10"></div>
+      </div>
     </div>
-  </header>
+  </section>
 
-  <h4 class="heading-text">STATUS</h4>
-  <div class="status-grid">
-    <img src="https://fortportfolio.vercel.app/public/assets/default.jpg" alt="status">
-    <img src="https://fortportfolio.vercel.app/public/assets/default.jpg" alt="status">
-    <img src="https://fortportfolio.vercel.app/public/assets/default.jpg" alt="status">
-    <img src="https://fortportfolio.vercel.app/public/assets/default.jpg" alt="status">
-  </div>
-    <h4 class="heading-text">CONTACT</h4>
-  <div class="contact-grid">
-      <!-- ADDED icons to each contact box (exactly as instructed) -->
-      <div class="contact-grid-box">
-        <i class="fab fa-whatsapp" style="font-size: 24px;"></i>
-        <p>Whatsapp</p>
+  <!-- FEATURE GRID -->
+  <section id="features" class="py-20 px-6 bg-white border-y border-gray-100">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-blue-600 font-semibold text-sm uppercase tracking-wider">Core power</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 text-gray-900">Everything you need to <br>stand out</h2>
+        <p class="text-gray-500 text-lg mt-4">No more scattered links — manage your portfolio, projects, and stats from one dashboard.</p>
       </div>
-      <div class="contact-grid-box">
-        <i class="far fa-envelope" style="font-size: 24px;"></i>
-        <p>Mail</p>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl mb-4">📁</div>
+          <h3 class="text-xl font-bold">Hosted projects + full HTML</h3>
+          <p class="text-gray-500 mt-2">Deploy interactive demos, three.js scenes, or design prototypes. Each project gets a unique /:userId/:slug URL.</p>
+        </div>
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-2xl mb-4">📈</div>
+          <h3 class="text-xl font-bold">Privacy-first analytics</h3>
+          <p class="text-gray-500 mt-2">Track unique visitors, referrers, and direct traffic. IPs are hashed, and you own every byte of data.</p>
+        </div>
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-2xl mb-4">🎨</div>
+          <h3 class="text-xl font-bold">Customize profile & portfolio</h3>
+          <p class="text-gray-500 mt-2">Switch between hosted, redirect, or minimal mode. Update icon, bio, and portfolio content with zero friction.</p>
+        </div>
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-2xl mb-4">🔑</div>
+          <h3 class="text-xl font-bold">JWT auth + secure storage</h3>
+          <p class="text-gray-500 mt-2">Password hashing (SHA256+salt), 14d tokens, email indexing. Admin tools to manage users safely.</p>
+        </div>
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-2xl mb-4">🌐</div>
+          <h3 class="text-xl font-bold">Public portfolio routes</h3>
+          <p class="text-gray-500 mt-2">Share your tag: <span class="font-mono text-blue-600">myexploits.vercel.app/username</span> — instant web presence.</p>
+        </div>
+        <div class="feature-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl mb-4">🛠️</div>
+          <h3 class="text-xl font-bold">Project types: image/link/hosted</h3>
+          <p class="text-gray-500 mt-2">Showcase anything — from design mocks to external tools. Visibility: public / private / test.</p>
+        </div>
       </div>
-      <a href="tel:+23487677656" class="contact-grid-box">
-        <i class="fas fa-phone-alt" style="font-size: 24px;"></i>
-        <p>Call</p>
-      </a>
+    </div>
+  </section>
+
+  <!-- DEMO SCREENSHOTS / INTERACTIVE DEMO SHOWCASE -->
+  <section id="demos" class="py-24 px-6 bg-gradient-to-b from-gray-50 to-white">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-4xl font-bold text-gray-900">See Exploits in action</h2>
+        <p class="text-gray-500 text-lg mt-2">Real previews — hosted projects, analytics dashboard & portfolio snapshots</p>
+      </div>
+
+      <!-- demo cards -->
+      <div class="grid md:grid-cols-2 gap-10">
+        <!-- card 1: hosted project preview -->
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 transition-all hover:shadow-2xl">
+          <div class="bg-gray-900 text-white text-xs px-4 py-2 flex justify-between items-center">
+            <span>🌐 live preview: three.js galaxy</span>
+            <span class="bg-blue-500/20 px-2 py-0.5 rounded-full">hosted project</span>
+          </div>
+          <div class="p-5 bg-white">
+            <div class="aspect-video bg-gradient-to-br from-indigo-900 to-purple-800 rounded-xl flex items-center justify-center text-white shadow-inner">
+              <div class="text-center">
+                <div class="text-5xl mb-2">✨🌀</div>
+                <p class="font-mono text-sm">interactive 3D galaxy — click & drag</p>
+                <button onclick="openDemoModal('galaxy')" class="mt-3 text-xs bg-white/20 backdrop-blur px-4 py-1.5 rounded-full hover:bg-white/30 transition">preview demo</button>
+              </div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+              <div><span class="font-bold">galaxy-explorer</span><span class="text-gray-400 text-sm ml-2">/projects/</span></div>
+              <div class="flex gap-2 text-xs text-gray-500">📊 342 visits · unique 124</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- card 2: analytics dashboard mock -->
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 transition-all hover:shadow-2xl">
+          <div class="bg-gray-800 text-white text-xs px-4 py-2 flex justify-between">
+            <span>📊 analytics dashboard</span>
+            <span class="bg-green-500/30 px-2 rounded-full">real‑time</span>
+          </div>
+          <div class="p-5">
+            <div class="bg-gray-50 rounded-xl p-3 font-mono text-sm space-y-2">
+              <div class="flex justify-between border-b pb-1"><span>Total visits</span><span class="font-bold">1,284</span></div>
+              <div class="flex justify-between border-b pb-1"><span>Unique visitors (24h)</span><span class="font-bold">203</span></div>
+              <div class="flex justify-between"><span>Top referrer</span><span class="text-blue-600">twitter.com/share</span></div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mt-2"><div class="bg-purple-500 w-3/4 h-2 rounded-full"></div></div>
+              <p class="text-xs text-gray-400 mt-2">IP‑hashed · GDPR friendly · direct traffic detected</p>
+            </div>
+            <div class="mt-4 text-right"><span class="text-xs text-gray-400">last 100 visits tracked per project</span></div>
+          </div>
+        </div>
+
+        <!-- card 3: portfolio modes (switch) + screenshot -->
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 md:col-span-2 grid md:grid-cols-2 gap-0">
+          <div class="p-6">
+            <h3 class="text-xl font-bold flex items-center gap-2"><span>🎭</span> Portfolio flexibility</h3>
+            <ul class="mt-3 space-y-3 text-gray-600">
+              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Hosted mode</strong> – custom HTML/CSS/JS with full interactivity</li>
+              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Redirect mode</strong> – send visitors to your custom domain</li>
+              <li class="flex gap-2"><span class="text-blue-500">▹</span> <strong>Minimal profile</strong> – show icon + bio + coming soon</li>
+            </ul>
+            <div class="mt-5 p-3 bg-gray-100 rounded-xl text-sm font-mono">
+              <span class="text-gray-500">GET</span> https://myexploits.vercel.app/portfolio/designwiz<br/>
+              → returns hosted portfolio or redirect
+            </div>
+          </div>
+          <div class="bg-gray-900 p-5 flex items-center justify-center rounded-bl-2xl">
+            <div class="bg-white/5 p-4 rounded-2xl w-full text-center">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 mx-auto"></div>
+              <p class="text-white font-mono text-xs mt-2">"designwiz" portfolio → redirects to behance</p>
+              <div class="flex gap-1 justify-center mt-2"><span class="w-2 h-2 bg-green-400 rounded-full"></span><span class="text-gray-300 text-[11px]">redirect active</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- card 4: project creation demo (inline) -->
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70">
+          <div class="bg-gray-100 px-5 py-3 border-b flex gap-3">
+            <div class="w-3 h-3 rounded-full bg-gray-400"></div><div class="w-3 h-3 rounded-full bg-gray-400"></div>
+            <span class="text-sm font-medium">create new project · API example</span>
+          </div>
+          <div class="p-5 bg-gray-50">
+            <pre class="text-xs bg-gray-900 text-green-300 p-4 rounded-xl overflow-x-auto"><code>// POST /api/projects?action=create
+{
+  "name": "glassmorphism UI",
+  "type": "hosted",
+  "visibility": "public",
+  "content": "&lt;div&gt;✨ interactive&lt;/div&gt;"
+}</code></pre>
+            <div class="flex justify-end mt-3"><button onclick="openDemoModal('apiDemo')" class="text-blue-600 text-sm font-medium">▶ try demo response</button></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200/70 flex flex-col">
+          <div class="p-6 flex-1">
+            <div class="flex items-center gap-3"><span class="text-3xl">🧑‍🎨</span><h3 class="font-bold text-xl">For designers & devs</h3></div>
+            <p class="mt-2 text-gray-500">Build a stunning grid of projects with image thumbnails, hosted experiments, and track which ones get the most love.</p>
+            <div class="grid grid-cols-3 gap-2 mt-5">
+              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">🎨</div>
+              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">💻</div>
+              <div class="bg-gray-200 h-16 rounded-lg flex items-center justify-center text-2xl">📱</div>
+            </div>
+          </div>
+          <div class="bg-blue-50 px-5 py-3 text-xs text-blue-700">⭐ public projects appear on /api/projects?action=public&user_tag=...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE: real user demo snapshots + stats -->
+  <section id="showcase" class="py-20 px-6 bg-white">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+        <div><span class="text-purple-600 font-semibold text-sm">⚡ live ecosystem</span>
+        <h2 class="text-3xl md:text-4xl font-bold mt-1">What creators build on Exploits</h2></div>
+        <div class="flex gap-1 mt-3"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">+120 projects hosted</span></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-7">
+        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
+          <img src="https://picsum.photos/id/26/400/220" alt="demo" class="w-full h-40 object-cover">
+          <div class="p-5"><div class="font-bold">@motion_lab</div><p class="text-gray-500 text-sm">Hosted portfolio with three.js + WebGL experiments. Gets 240 unique visitors/week.</p><div class="flex mt-2 text-xs text-blue-500">🔗 hosted project active</div></div>
+        </div>
+        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
+          <img src="https://picsum.photos/id/1/400/220" alt="demo" class="w-full h-40 object-cover">
+          <div class="p-5"><div class="font-bold">@ux_sage</div><p class="text-gray-500 text-sm">Redirect portfolio → personal site, analytics show 67% traffic from Dribbble.</p><div class="flex mt-2 text-xs text-purple-500">📊 analytics enabled</div></div>
+        </div>
+        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
+          <img src="https://picsum.photos/id/169/400/220" alt="demo" class="w-full h-40 object-cover">
+          <div class="p-5"><div class="font-bold">@codewitch</div><p class="text-gray-500 text-sm">5 hosted projects (react playground, canvas game, design system). total visits 1.2k+</p><div class="flex mt-2 text-xs text-green-600">✨ full HTML customisation</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-3xl mx-4 md:mx-8 mb-10">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold">Ready to launch your portfolio?</h2>
+      <p class="text-gray-300 text-lg mt-4">Join developers and designers who own their creative footprint. Zero lock‑in, full control.</p>
+      <div class="flex flex-wrap justify-center gap-5 mt-10">
+        <a href="https://myexploits.vercel.app/api/auth?action=create" class="px-8 py-3 rounded-full bg-white text-gray-900 font-bold shadow-xl hover:bg-gray-100 transition">Get started free</a>
+        <a href="#" class="px-8 py-3 rounded-full border border-white/30 text-white font-medium hover:bg-white/10 transition">Read documentation</a>
+      </div>
+      <p class="text-sm text-gray-400 mt-8">✨ No credit card • full API access • Firebase backend</p>
+    </div>
+  </section>
+
+  <!-- footer -->
+  <footer class="py-8 px-6 text-center text-gray-500 text-sm border-t">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+      <span>© 2025 Exploits — portfolio infrastructure for creatives</span>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-gray-900">Privacy</a>
+        <a href="#" class="hover:text-gray-900">Terms</a>
+        <a href="#" class="hover:text-gray-900">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DEMO MODAL (interactive preview simulation) -->
+  <div id="demoModal" class="fixed inset-0 flex items-center justify-center z-50 hidden transition-all duration-300" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl transform transition-all">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-bold" id="modalTitle">Demo preview</h3>
+        <button onclick="closeDemoModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      <div id="modalContent" class="mt-4 text-gray-600">
+        <!-- dynamic content -->
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button onclick="closeDemoModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-sm font-medium">Close</button>
+      </div>
+    </div>
   </div>
 
-  <!-- PROJECTS SECTION (exactly as original, no changes) -->
-  <div class="projects-grid">
-    <div class="project-card">
-      <img src="/default.jpg" class="post-image" alt="project">
-      <div class="about-project-main">
-        <div class="about-project">
-          <img src="../fort.jpg" class="logo-image" alt="logo">
-          <h4>FORTSYTE</h4>
-        </div>
-      </div>
-      <p>Revolutionize your business today</p>
-    </div>
-  </div>
-    <div class="project-card">
-      <img src="/default.jpg" class="post-image" alt="project">
-      <div class="about-project-main">
-        <div class="about-project">
-          <img src="../fort.jpg" class="logo-image" alt="logo">
-          <h4>FORTSYTE</h4>
-        </div>
-      </div>
-      <p>Revolutionize your business today</p>
-    </div>
-  </div>
-    <div class="project-card">
-      <img src="/default.jpg" class="post-image" alt="project">
-      <div class="about-project-main">
-        <div class="about-project">
-          <img src="../fort.jpg" class="logo-image" alt="logo">
-          <h4>FORTSYTE</h4>
-        </div>
-      </div>
-      <p>Revolutionize your business today</p>
-    </div>
-  </div>
-
-  <div class="credit-footer">
-    <i class="fas fa-dice-d6"></i> imagination to reality · FORTUNE <i class="fas fa-heart" style="color: #623E6F;"></i>
-  </div>
+  <script>
+    function openDemoModal(type) {
+      const modal = document.getElementById('demoModal');
+      const titleEl = document.getElementById('modalTitle');
+      const contentEl = document.getElementById('modalContent');
+      if (type === 'galaxy') {
+        titleEl.innerText = '🌌 hosted project preview (galaxy-explorer)';
+        contentEl.innerHTML = `<div class="bg-gray-900 rounded-xl p-4 text-white text-center"><div class="text-4xl mb-2">✨🌀✨</div><p class="text-sm">Interactive 3D scene loaded from Exploits hosted project. Full JavaScript/Three.js allowed.<br><span class="text-xs text-gray-400">URL: /portfolio/maker/galaxy-explorer</span></p><div class="mt-3 flex justify-center gap-2"><span class="bg-blue-500/30 px-2 py-1 rounded-full text-xs">click & drag</span><span class="bg-purple-500/30 px-2 py-1 rounded-full text-xs">live demo</span></div></div><p class="mt-3 text-xs text-gray-500">CSP allows scripts/styles — fully functional HTML/CSS/JS sandbox.</p>`;
+      } else if (type === 'apiDemo') {
+        titleEl.innerText = '⚡ API response simulation';
+        contentEl.innerHTML = `<pre class="bg-gray-800 text-green-300 p-3 rounded-lg text-xs overflow-auto">{
+  "message": "Project created successfully",
+  "project": {
+    "projectId": "proj_1739981234_abc123",
+    "name": "glassmorphism UI",
+    "slug": "glassmorphism-ui",
+    "hosted_url": "https://myexploits.vercel.app/projects/user123/glassmorphism-ui",
+    "visibility": "public"
+  },
+  "publish_url": "https://myexploits.vercel.app/user123/glassmorphism-ui"
+}</pre><p class="text-xs mt-2 text-gray-500">✨ Analytics session auto‑created if enabled.</p>`;
+      } else {
+        titleEl.innerText = 'Exploits live demo';
+        contentEl.innerHTML = `<div class="flex flex-col gap-3"><div class="bg-gray-100 p-4 rounded-xl text-center">🎯 Interactive project gallery, real-time visit counter and privacy-first analytics.</div><div class="text-sm text-blue-600">Try creating your own: <span class="font-mono">POST /api/auth?action=create</span></div></div>`;
+      }
+      modal.classList.remove('hidden');
+    }
+    function closeDemoModal() {
+      document.getElementById('demoModal').classList.add('hidden');
+    }
+    window.onclick = function(e) {
+      const modal = document.getElementById('demoModal');
+      if (e.target === modal) closeDemoModal();
+    }
+  </script>
 </body>
 </html>
