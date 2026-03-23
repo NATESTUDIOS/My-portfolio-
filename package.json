@@ -6,7 +6,9 @@
 
   "dependencies": {
     "firebase-admin": "^11.11.0",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "@sparticuz/chromium": "^121.0.0",
+    "puppeteer-core": "^21.0.0"
   },
  
   "author": "Natestudios"
