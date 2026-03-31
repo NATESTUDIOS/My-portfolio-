@@ -23,6 +23,13 @@ const DEMO_NAMES = [
   { fName: 'Maria', lName: 'Taylor' }
 ];
 
+// Nigeria is the fixed country for all test accounts
+const NIGERIA_CONFIG = {
+  name: 'Nigeria',
+  format: 'en-NG',
+  currency: 'NGN'
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -55,27 +62,9 @@ function generateTestEmail(index) {
 }
 
 /**
- * Get random country with currency format
+ * Create registration payload with Nigeria as fixed country
  */
-function getRandomCountry() {
-  const countries = [
-    { name: 'Nigeria', format: 'en-NG', currency: 'NGN' },
-    { name: 'USA', format: 'en-US', currency: 'USD' },
-    { name: 'UK', format: 'en-GB', currency: 'GBP' },
-    { name: 'Canada', format: 'en-CA', currency: 'CAD' },
-    { name: 'India', format: 'en-IN', currency: 'INR' },
-    { name: 'Kenya', format: 'en-KE', currency: 'KES' },
-    { name: 'Ghana', format: 'en-GH', currency: 'GHS' },
-    { name: 'South Africa', format: 'en-ZA', currency: 'ZAR' }
-  ];
-  return countries[Math.floor(Math.random() * countries.length)];
-}
-
-/**
- * Create registration payload with referral code
- * IMPORTANT: The inviter field must match the referral code from the link
- */
-function createRegistrationPayload(userData, countryData) {
+function createRegistrationPayload(userData) {
   const currentDate = new Date();
   
   return {
@@ -83,26 +72,24 @@ function createRegistrationPayload(userData, countryData) {
     lName: userData.lName,
     email: userData.email,
     password: TEST_PASSWORD,
-    country: countryData.name,
-    currency_format: countryData.format,
-    currency: countryData.currency,
+    country: NIGERIA_CONFIG.name,
+    currency_format: NIGERIA_CONFIG.format,
+    currency: NIGERIA_CONFIG.currency,
     date: formatDate(currentDate),
-    inviter: REFERRAL_CODE  // This is the key - matches the referral link
+    inviter: REFERRAL_CODE
   };
 }
 
 /**
  * Test registration endpoint
- * Now using the referral flow properly
  */
 async function testRegistration(payload, attemptWithReferral = true) {
   try {
-    // The registration endpoint is /register, but the referral is tracked via the inviter field
     const response = await axios.post(`${BASE_URL}/register`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-        'Referer': attemptWithReferral ? REFERRAL_LINK : BASE_URL, // Optional: add referer header
+        'Referer': attemptWithReferral ? REFERRAL_LINK : BASE_URL,
         'Origin': BASE_URL
       },
       timeout: 15000
@@ -114,6 +101,7 @@ async function testRegistration(payload, attemptWithReferral = true) {
       data: response.data,
       usedReferral: attemptWithReferral,
       referralCode: REFERRAL_CODE,
+      country: NIGERIA_CONFIG.name,
       payload: { ...payload, password: '***hidden***' }
     };
   } catch (error) {
@@ -121,6 +109,7 @@ async function testRegistration(payload, attemptWithReferral = true) {
       success: false,
       usedReferral: attemptWithReferral,
       referralCode: REFERRAL_CODE,
+      country: NIGERIA_CONFIG.name,
       payload: { ...payload, password: '***hidden***' }
     };
     
@@ -173,7 +162,6 @@ async function testOTPAutoVerify() {
  */
 async function testRateLimiting(count = 5) {
   const results = [];
-  const countryData = getRandomCountry();
   
   // Create array of promises for parallel requests
   const promises = [];
@@ -183,7 +171,7 @@ async function testRateLimiting(count = 5) {
       lName: `Test${i}`,
       email: generateTestEmail(i)
     };
-    const payload = createRegistrationPayload(userData, countryData);
+    const payload = createRegistrationPayload(userData);
     
     promises.push(
       testRegistration(payload, true).then(result => ({
@@ -201,6 +189,7 @@ async function testRateLimiting(count = 5) {
       success: result.success,
       status: result.status,
       usedReferral: result.usedReferral,
+      country: result.country,
       message: result.data?.message || result.data?.error?.message || result.message
     });
   }
@@ -213,6 +202,7 @@ async function testRateLimiting(count = 5) {
     successful: successCount,
     rateLimited: rateLimitedCount,
     failed: count - successCount - rateLimitedCount,
+    country: NIGERIA_CONFIG.name,
     details: results
   };
 }
@@ -221,22 +211,20 @@ async function testRateLimiting(count = 5) {
  * Test referral tracking - verify that accounts are linked to the referrer
  */
 async function testReferralTracking() {
-  console.log('\n🔍 Testing Referral Tracking');
-  
   // Create a unique test account through the referral link
   const testUser = {
     fName: 'Referral',
     lName: 'Test',
     email: `referral.test.${Date.now()}@${TEST_EMAIL_DOMAIN}`
   };
-  const countryData = getRandomCountry();
-  const payload = createRegistrationPayload(testUser, countryData);
+  const payload = createRegistrationPayload(testUser);
   
   const result = await testRegistration(payload, true);
   
   return {
     referralCode: REFERRAL_CODE,
     referralLink: REFERRAL_LINK,
+    country: NIGERIA_CONFIG.name,
     accountCreated: result.success,
     details: result
   };
@@ -269,12 +257,13 @@ export default async function handler(req, res) {
           baseUrl: BASE_URL,
           testPassword: TEST_PASSWORD,
           emailDomain: TEST_EMAIL_DOMAIN,
+          country: NIGERIA_CONFIG,
           demoNamesCount: DEMO_NAMES.length
         },
         instructions: {
-          register: `POST with action "register" - creates accounts using referral ${REFERRAL_CODE}`,
-          test: `POST with action "test" - runs security tests with referral tracking`,
-          verifyReferral: `POST with action "verify-referral" - tests if referral tracking works`
+          register: `POST with action "register" - creates accounts using referral ${REFERRAL_CODE} (all Nigeria)`,
+          test: `POST with action "test" - runs security tests with referral tracking (all Nigeria)`,
+          verifyReferral: `POST with action "verify-referral" - tests if referral tracking works (Nigeria)`
         }
       });
     }
@@ -286,6 +275,7 @@ export default async function handler(req, res) {
         error: 'Action required',
         referralLink: REFERRAL_LINK,
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG.name,
         validActions: ['test', 'register', 'verify', 'verify-referral']
       });
     }
@@ -303,8 +293,9 @@ export default async function handler(req, res) {
         message: 'Referral tracking test completed',
         referralLink: REFERRAL_LINK,
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG.name,
         test: referralTest,
-        note: 'If account was created successfully, it should be linked to the referral code FRkzjxoaai'
+        note: `All test accounts are created with country set to ${NIGERIA_CONFIG.name}`
       });
     }
 
@@ -316,45 +307,47 @@ export default async function handler(req, res) {
         timestamp: new Date().toISOString(),
         referralLink: REFERRAL_LINK,
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG,
         testPassword: TEST_PASSWORD,
         tests: []
       };
       
-      // Test 1: Single valid registration WITH referral
+      // Test 1: Single valid registration WITH referral (Nigeria)
       const singleUser = DEMO_NAMES[0];
-      const singleCountry = getRandomCountry();
       const singleEmail = generateTestEmail(0);
-      const singlePayload = createRegistrationPayload(
-        { ...singleUser, email: singleEmail },
-        singleCountry
-      );
+      const singlePayload = createRegistrationPayload({
+        ...singleUser,
+        email: singleEmail
+      });
       
       const singleResult = await testRegistration(singlePayload, true);
       testResults.tests.push({
-        name: 'Single Registration (with referral)',
+        name: 'Single Registration (with referral - Nigeria)',
         success: singleResult.success,
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG.name,
         details: singleResult
       });
       
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Test 2: Duplicate email test
-      const duplicatePayload = createRegistrationPayload(
-        { ...singleUser, email: singleEmail },
-        singleCountry
-      );
+      const duplicatePayload = createRegistrationPayload({
+        ...singleUser,
+        email: singleEmail
+      });
       
       const duplicateResult = await testRegistration(duplicatePayload, true);
       testResults.tests.push({
         name: 'Duplicate Email Test',
         success: !duplicateResult.success,
+        country: NIGERIA_CONFIG.name,
         details: duplicateResult
       });
       
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Test 3: Multiple sequential registrations with referral
+      // Test 3: Multiple sequential registrations with referral (all Nigeria)
       const sequentialResults = [];
       const sequentialCount = Math.min(count, DEMO_NAMES.length);
       
@@ -363,8 +356,7 @@ export default async function handler(req, res) {
           ...DEMO_NAMES[i],
           email: generateTestEmail(i + 100)
         };
-        const countryData = getRandomCountry();
-        const payload = createRegistrationPayload(userData, countryData);
+        const payload = createRegistrationPayload(userData);
         
         const result = await testRegistration(payload, true);
         sequentialResults.push({
@@ -373,6 +365,7 @@ export default async function handler(req, res) {
           success: result.success,
           usedReferral: result.usedReferral,
           referralCode: REFERRAL_CODE,
+          country: result.country,
           response: result.data?.message || result.data?.error?.message
         });
         
@@ -382,10 +375,11 @@ export default async function handler(req, res) {
       }
       
       testResults.tests.push({
-        name: `Sequential Registrations (${sequentialCount} accounts with referral)`,
+        name: `Sequential Registrations (${sequentialCount} accounts with referral - All Nigeria)`,
         success: sequentialResults.filter(r => r.success).length,
         total: sequentialCount,
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG.name,
         details: sequentialResults
       });
       
@@ -396,6 +390,7 @@ export default async function handler(req, res) {
       testResults.tests.push({
         name: 'Rate Limiting Test',
         referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG.name,
         ...rateLimitResults
       });
       
@@ -413,18 +408,23 @@ export default async function handler(req, res) {
       
       return res.status(200).json({
         success: true,
-        message: 'Security tests completed with referral tracking',
+        message: 'Security tests completed with referral tracking (all accounts set to Nigeria)',
         referralInfo: {
           code: REFERRAL_CODE,
           link: REFERRAL_LINK,
           note: 'All test accounts are created using this referral code'
+        },
+        countryInfo: {
+          country: NIGERIA_CONFIG.name,
+          currency: NIGERIA_CONFIG.currency,
+          format: NIGERIA_CONFIG.format
         },
         results: testResults
       });
     }
     
     // ─────────────────────────────────────────
-    // REGISTER ACTION - Create multiple test accounts WITH REFERRAL
+    // REGISTER ACTION - Create multiple test accounts WITH REFERRAL (ALL NIGERIA)
     // ─────────────────────────────────────────
     if (bodyAction === 'register' && req.method === 'POST') {
       const accountsToCreate = Math.min(count, DEMO_NAMES.length);
@@ -436,8 +436,7 @@ export default async function handler(req, res) {
           ...DEMO_NAMES[i],
           email: generateTestEmail(i)
         };
-        const countryData = getRandomCountry();
-        const payload = createRegistrationPayload(userData, countryData);
+        const payload = createRegistrationPayload(userData);
         
         const result = await testRegistration(payload, true);
         
@@ -446,7 +445,8 @@ export default async function handler(req, res) {
             user: `${userData.fName} ${userData.lName}`,
             email: userData.email,
             password: TEST_PASSWORD,
-            country: countryData.name,
+            country: NIGERIA_CONFIG.name,
+            currency: NIGERIA_CONFIG.currency,
             registered: true,
             usedReferral: true,
             referralCode: REFERRAL_CODE,
@@ -457,6 +457,7 @@ export default async function handler(req, res) {
           errors.push({
             user: `${userData.fName} ${userData.lName}`,
             email: userData.email,
+            country: NIGERIA_CONFIG.name,
             error: result.data?.error?.message || result.message,
             status: result.status,
             usedReferral: true,
@@ -474,6 +475,12 @@ export default async function handler(req, res) {
         totalAttempted: accountsToCreate,
         accountsCreated: accounts.length,
         errors: errors.length,
+        countryInfo: {
+          country: NIGERIA_CONFIG.name,
+          currency: NIGERIA_CONFIG.currency,
+          format: NIGERIA_CONFIG.format,
+          note: 'All accounts are set to Nigeria'
+        },
         referralInfo: {
           code: REFERRAL_CODE,
           link: REFERRAL_LINK,
@@ -505,9 +512,9 @@ export default async function handler(req, res) {
         lName: 'Test',
         email: email,
         password: TEST_PASSWORD,
-        country: 'Nigeria',
-        currency_format: 'en-NG',
-        currency: 'NGN',
+        country: NIGERIA_CONFIG.name,
+        currency_format: NIGERIA_CONFIG.format,
+        currency: NIGERIA_CONFIG.currency,
         date: formatDate(new Date()),
         inviter: REFERRAL_CODE
       };
@@ -520,6 +527,7 @@ export default async function handler(req, res) {
         success: true,
         email: email,
         exists: emailExists,
+        country: NIGERIA_CONFIG.name,
         referralCode: REFERRAL_CODE,
         details: result.data
       });
@@ -533,6 +541,7 @@ export default async function handler(req, res) {
       error: 'Invalid action or method',
       referralLink: REFERRAL_LINK,
       referralCode: REFERRAL_CODE,
+      country: NIGERIA_CONFIG.name,
       validActions: ['test', 'register', 'verify', 'verify-referral'],
       validMethods: {
         test: 'POST',
@@ -544,7 +553,8 @@ export default async function handler(req, res) {
       config: {
         testPassword: TEST_PASSWORD,
         emailDomain: TEST_EMAIL_DOMAIN,
-        referralCode: REFERRAL_CODE
+        referralCode: REFERRAL_CODE,
+        country: NIGERIA_CONFIG
       }
     });
     
@@ -554,6 +564,7 @@ export default async function handler(req, res) {
       success: false,
       error: error.message,
       referralCode: REFERRAL_CODE,
+      country: NIGERIA_CONFIG.name,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
