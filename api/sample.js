@@ -5,6 +5,7 @@ import axios from 'axios';
 // ========== CONFIGURATION ==========
 const BASE_URL = 'https://bullbatch.com';
 const REFERRAL_CODE = 'FRkzjxoaai';
+const REFERRAL_LINK = `https://bullbatch.com/reg/${REFERRAL_CODE}`;
 const TEST_PASSWORD = 'DemoTest@2024!';
 const TEST_EMAIL_DOMAIN = 'testbullbatch.com';
 
@@ -31,7 +32,7 @@ const corsHeaders = {
 // ========== HELPER FUNCTIONS ==========
 
 /**
- * Format date for BullBatch
+ * Format date for BullBatch (matches their format)
  */
 function formatDate(date) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -71,7 +72,8 @@ function getRandomCountry() {
 }
 
 /**
- * Create registration payload
+ * Create registration payload with referral code
+ * IMPORTANT: The inviter field must match the referral code from the link
  */
 function createRegistrationPayload(userData, countryData) {
   const currentDate = new Date();
@@ -85,19 +87,23 @@ function createRegistrationPayload(userData, countryData) {
     currency_format: countryData.format,
     currency: countryData.currency,
     date: formatDate(currentDate),
-    inviter: REFERRAL_CODE
+    inviter: REFERRAL_CODE  // This is the key - matches the referral link
   };
 }
 
 /**
  * Test registration endpoint
+ * Now using the referral flow properly
  */
-async function testRegistration(payload) {
+async function testRegistration(payload, attemptWithReferral = true) {
   try {
+    // The registration endpoint is /register, but the referral is tracked via the inviter field
     const response = await axios.post(`${BASE_URL}/register`, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Referer': attemptWithReferral ? REFERRAL_LINK : BASE_URL, // Optional: add referer header
+        'Origin': BASE_URL
       },
       timeout: 15000
     });
@@ -106,11 +112,15 @@ async function testRegistration(payload) {
       success: true,
       status: response.status,
       data: response.data,
+      usedReferral: attemptWithReferral,
+      referralCode: REFERRAL_CODE,
       payload: { ...payload, password: '***hidden***' }
     };
   } catch (error) {
     let errorResponse = {
       success: false,
+      usedReferral: attemptWithReferral,
+      referralCode: REFERRAL_CODE,
       payload: { ...payload, password: '***hidden***' }
     };
     
@@ -176,7 +186,7 @@ async function testRateLimiting(count = 5) {
     const payload = createRegistrationPayload(userData, countryData);
     
     promises.push(
-      testRegistration(payload).then(result => ({
+      testRegistration(payload, true).then(result => ({
         index: i,
         result
       }))
@@ -190,6 +200,7 @@ async function testRateLimiting(count = 5) {
       attempt: index + 1,
       success: result.success,
       status: result.status,
+      usedReferral: result.usedReferral,
       message: result.data?.message || result.data?.error?.message || result.message
     });
   }
@@ -206,6 +217,31 @@ async function testRateLimiting(count = 5) {
   };
 }
 
+/**
+ * Test referral tracking - verify that accounts are linked to the referrer
+ */
+async function testReferralTracking() {
+  console.log('\n🔍 Testing Referral Tracking');
+  
+  // Create a unique test account through the referral link
+  const testUser = {
+    fName: 'Referral',
+    lName: 'Test',
+    email: `referral.test.${Date.now()}@${TEST_EMAIL_DOMAIN}`
+  };
+  const countryData = getRandomCountry();
+  const payload = createRegistrationPayload(testUser, countryData);
+  
+  const result = await testRegistration(payload, true);
+  
+  return {
+    referralCode: REFERRAL_CODE,
+    referralLink: REFERRAL_LINK,
+    accountCreated: result.success,
+    details: result
+  };
+}
+
 // ========== MAIN HANDLER ==========
 
 export default async function handler(req, res) {
@@ -218,7 +254,7 @@ export default async function handler(req, res) {
   }
   
   try {
-    const { action } = req.query; // For GET requests, action comes from query
+    const { action } = req.query;
     const body = req.method !== 'GET' ? req.body : null;
 
     // ─────────────────────────────────────────
@@ -228,10 +264,17 @@ export default async function handler(req, res) {
       return res.json({
         success: true,
         config: {
+          referralLink: REFERRAL_LINK,
+          referralCode: REFERRAL_CODE,
           baseUrl: BASE_URL,
           testPassword: TEST_PASSWORD,
           emailDomain: TEST_EMAIL_DOMAIN,
           demoNamesCount: DEMO_NAMES.length
+        },
+        instructions: {
+          register: `POST with action "register" - creates accounts using referral ${REFERRAL_CODE}`,
+          test: `POST with action "test" - runs security tests with referral tracking`,
+          verifyReferral: `POST with action "verify-referral" - tests if referral tracking works`
         }
       });
     }
@@ -241,11 +284,29 @@ export default async function handler(req, res) {
       return res.status(400).json({ 
         success: false, 
         error: 'Action required',
-        validActions: ['test', 'register', 'verify']
+        referralLink: REFERRAL_LINK,
+        referralCode: REFERRAL_CODE,
+        validActions: ['test', 'register', 'verify', 'verify-referral']
       });
     }
 
     const { action: bodyAction, count = 5, delay = 2000, email } = body;
+
+    // ─────────────────────────────────────────
+    // TEST REFERRAL TRACKING
+    // ─────────────────────────────────────────
+    if (bodyAction === 'verify-referral' && req.method === 'POST') {
+      const referralTest = await testReferralTracking();
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Referral tracking test completed',
+        referralLink: REFERRAL_LINK,
+        referralCode: REFERRAL_CODE,
+        test: referralTest,
+        note: 'If account was created successfully, it should be linked to the referral code FRkzjxoaai'
+      });
+    }
 
     // ─────────────────────────────────────────
     // TEST ACTION - Run comprehensive tests
@@ -253,11 +314,13 @@ export default async function handler(req, res) {
     if (bodyAction === 'test' && req.method === 'POST') {
       const testResults = {
         timestamp: new Date().toISOString(),
+        referralLink: REFERRAL_LINK,
+        referralCode: REFERRAL_CODE,
         testPassword: TEST_PASSWORD,
         tests: []
       };
       
-      // Test 1: Single valid registration
+      // Test 1: Single valid registration WITH referral
       const singleUser = DEMO_NAMES[0];
       const singleCountry = getRandomCountry();
       const singleEmail = generateTestEmail(0);
@@ -266,10 +329,11 @@ export default async function handler(req, res) {
         singleCountry
       );
       
-      const singleResult = await testRegistration(singlePayload);
+      const singleResult = await testRegistration(singlePayload, true);
       testResults.tests.push({
-        name: 'Single Registration',
+        name: 'Single Registration (with referral)',
         success: singleResult.success,
+        referralCode: REFERRAL_CODE,
         details: singleResult
       });
       
@@ -281,16 +345,16 @@ export default async function handler(req, res) {
         singleCountry
       );
       
-      const duplicateResult = await testRegistration(duplicatePayload);
+      const duplicateResult = await testRegistration(duplicatePayload, true);
       testResults.tests.push({
         name: 'Duplicate Email Test',
-        success: !duplicateResult.success, // Should fail
+        success: !duplicateResult.success,
         details: duplicateResult
       });
       
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Test 3: Multiple sequential registrations
+      // Test 3: Multiple sequential registrations with referral
       const sequentialResults = [];
       const sequentialCount = Math.min(count, DEMO_NAMES.length);
       
@@ -302,11 +366,13 @@ export default async function handler(req, res) {
         const countryData = getRandomCountry();
         const payload = createRegistrationPayload(userData, countryData);
         
-        const result = await testRegistration(payload);
+        const result = await testRegistration(payload, true);
         sequentialResults.push({
           user: `${userData.fName} ${userData.lName}`,
           email: userData.email,
           success: result.success,
+          usedReferral: result.usedReferral,
+          referralCode: REFERRAL_CODE,
           response: result.data?.message || result.data?.error?.message
         });
         
@@ -316,9 +382,10 @@ export default async function handler(req, res) {
       }
       
       testResults.tests.push({
-        name: `Sequential Registrations (${sequentialCount} accounts)`,
+        name: `Sequential Registrations (${sequentialCount} accounts with referral)`,
         success: sequentialResults.filter(r => r.success).length,
         total: sequentialCount,
+        referralCode: REFERRAL_CODE,
         details: sequentialResults
       });
       
@@ -328,12 +395,13 @@ export default async function handler(req, res) {
       const rateLimitResults = await testRateLimiting(Math.min(count, 10));
       testResults.tests.push({
         name: 'Rate Limiting Test',
+        referralCode: REFERRAL_CODE,
         ...rateLimitResults
       });
       
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Test 5: OTP verification (if any registration succeeded)
+      // Test 5: OTP verification
       if (singleResult.success || sequentialResults.some(r => r.success)) {
         const otpResult = await testOTPAutoVerify();
         testResults.tests.push({
@@ -345,13 +413,18 @@ export default async function handler(req, res) {
       
       return res.status(200).json({
         success: true,
-        message: 'Security tests completed',
+        message: 'Security tests completed with referral tracking',
+        referralInfo: {
+          code: REFERRAL_CODE,
+          link: REFERRAL_LINK,
+          note: 'All test accounts are created using this referral code'
+        },
         results: testResults
       });
     }
     
     // ─────────────────────────────────────────
-    // REGISTER ACTION - Create multiple test accounts
+    // REGISTER ACTION - Create multiple test accounts WITH REFERRAL
     // ─────────────────────────────────────────
     if (bodyAction === 'register' && req.method === 'POST') {
       const accountsToCreate = Math.min(count, DEMO_NAMES.length);
@@ -366,7 +439,7 @@ export default async function handler(req, res) {
         const countryData = getRandomCountry();
         const payload = createRegistrationPayload(userData, countryData);
         
-        const result = await testRegistration(payload);
+        const result = await testRegistration(payload, true);
         
         if (result.success) {
           accounts.push({
@@ -375,6 +448,9 @@ export default async function handler(req, res) {
             password: TEST_PASSWORD,
             country: countryData.name,
             registered: true,
+            usedReferral: true,
+            referralCode: REFERRAL_CODE,
+            referralLink: REFERRAL_LINK,
             response: result.data
           });
         } else {
@@ -382,7 +458,9 @@ export default async function handler(req, res) {
             user: `${userData.fName} ${userData.lName}`,
             email: userData.email,
             error: result.data?.error?.message || result.message,
-            status: result.status
+            status: result.status,
+            usedReferral: true,
+            referralCode: REFERRAL_CODE
           });
         }
         
@@ -396,10 +474,18 @@ export default async function handler(req, res) {
         totalAttempted: accountsToCreate,
         accountsCreated: accounts.length,
         errors: errors.length,
+        referralInfo: {
+          code: REFERRAL_CODE,
+          link: REFERRAL_LINK,
+          note: 'All accounts were created using this referral link'
+        },
         accounts: accounts,
         errorDetails: errors,
         testPassword: TEST_PASSWORD,
-        note: 'Use these credentials to test login functionality'
+        loginInstructions: {
+          url: 'https://bullbatch.com/login',
+          credentials: accounts.map(a => ({ email: a.email, password: TEST_PASSWORD }))
+        }
       });
     }
     
@@ -414,7 +500,6 @@ export default async function handler(req, res) {
         });
       }
       
-      // Test if email exists by attempting registration
       const testPayload = {
         fName: 'Verify',
         lName: 'Test',
@@ -427,15 +512,15 @@ export default async function handler(req, res) {
         inviter: REFERRAL_CODE
       };
       
-      const result = await testRegistration(testPayload);
+      const result = await testRegistration(testPayload, true);
       
-      // If error code is EMAIL_ALREADY_EXIST, email exists
       const emailExists = result.data?.error?.code === 'EMAIL_ALREADY_EXIST';
       
       return res.status(200).json({
         success: true,
         email: email,
         exists: emailExists,
+        referralCode: REFERRAL_CODE,
         details: result.data
       });
     }
@@ -446,16 +531,20 @@ export default async function handler(req, res) {
     return res.status(400).json({
       success: false,
       error: 'Invalid action or method',
-      validActions: ['test', 'register', 'verify'],
+      referralLink: REFERRAL_LINK,
+      referralCode: REFERRAL_CODE,
+      validActions: ['test', 'register', 'verify', 'verify-referral'],
       validMethods: {
         test: 'POST',
         register: 'POST',
         verify: 'POST',
+        'verify-referral': 'POST',
         status: 'GET'
       },
       config: {
         testPassword: TEST_PASSWORD,
-        emailDomain: TEST_EMAIL_DOMAIN
+        emailDomain: TEST_EMAIL_DOMAIN,
+        referralCode: REFERRAL_CODE
       }
     });
     
@@ -464,6 +553,7 @@ export default async function handler(req, res) {
     return res.status(500).json({
       success: false,
       error: error.message,
+      referralCode: REFERRAL_CODE,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
