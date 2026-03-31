@@ -1,12 +1,12 @@
 // api/bullbatch-test.js
 
-const axios = require('axios');
+import axios from 'axios';
 
-// Configuration
+// ========== CONFIGURATION ==========
 const BASE_URL = 'https://bullbatch.com';
 const REFERRAL_CODE = 'FRkzjxoaai';
-const TEST_PASSWORD = 'DemoTest@2024!'; // Consistent password for all tests
-const TEST_EMAIL_DOMAIN = 'testbullbatch.com'; // Use your own domain or temporary email service
+const TEST_PASSWORD = 'DemoTest@2024!';
+const TEST_EMAIL_DOMAIN = 'testbullbatch.com';
 
 // Demo names for testing
 const DEMO_NAMES = [
@@ -24,7 +24,7 @@ const DEMO_NAMES = [
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type'
 };
 
@@ -54,7 +54,7 @@ function generateTestEmail(index) {
 }
 
 /**
- * Get random country
+ * Get random country with currency format
  */
 function getRandomCountry() {
   const countries = [
@@ -165,8 +165,6 @@ async function testRateLimiting(count = 5) {
   const results = [];
   const countryData = getRandomCountry();
   
-  console.log(`\n📊 Testing rate limiting with ${count} rapid requests...`);
-  
   // Create array of promises for parallel requests
   const promises = [];
   for (let i = 0; i < count; i++) {
@@ -219,21 +217,40 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
   
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      success: false, 
-      error: 'Method not allowed. Use POST.' 
-    });
-  }
-  
   try {
-    const { action, count = 5, delay = 2000 } = req.body;
-    
+    const { action } = req.query; // For GET requests, action comes from query
+    const body = req.method !== 'GET' ? req.body : null;
+
+    // ─────────────────────────────────────────
+    // GET TEST STATUS
+    // ─────────────────────────────────────────
+    if (req.method === 'GET' && action === 'status') {
+      return res.json({
+        success: true,
+        config: {
+          baseUrl: BASE_URL,
+          testPassword: TEST_PASSWORD,
+          emailDomain: TEST_EMAIL_DOMAIN,
+          demoNamesCount: DEMO_NAMES.length
+        }
+      });
+    }
+
+    // For all non-GET requests, require an action in body
+    if (!body || !body.action) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Action required',
+        validActions: ['test', 'register', 'verify']
+      });
+    }
+
+    const { action: bodyAction, count = 5, delay = 2000, email } = body;
+
     // ─────────────────────────────────────────
     // TEST ACTION - Run comprehensive tests
     // ─────────────────────────────────────────
-    if (action === 'test') {
+    if (bodyAction === 'test' && req.method === 'POST') {
       const testResults = {
         timestamp: new Date().toISOString(),
         testPassword: TEST_PASSWORD,
@@ -241,7 +258,6 @@ export default async function handler(req, res) {
       };
       
       // Test 1: Single valid registration
-      console.log('\n🔍 Running Test 1: Single valid registration');
       const singleUser = DEMO_NAMES[0];
       const singleCountry = getRandomCountry();
       const singleEmail = generateTestEmail(0);
@@ -260,7 +276,6 @@ export default async function handler(req, res) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Test 2: Duplicate email test
-      console.log('\n🔍 Running Test 2: Duplicate email registration');
       const duplicatePayload = createRegistrationPayload(
         { ...singleUser, email: singleEmail },
         singleCountry
@@ -276,7 +291,6 @@ export default async function handler(req, res) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Test 3: Multiple sequential registrations
-      console.log('\n🔍 Running Test 3: Multiple sequential registrations');
       const sequentialResults = [];
       const sequentialCount = Math.min(count, DEMO_NAMES.length);
       
@@ -311,7 +325,6 @@ export default async function handler(req, res) {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Test 4: Rate limiting test
-      console.log('\n🔍 Running Test 4: Rate limiting test');
       const rateLimitResults = await testRateLimiting(Math.min(count, 10));
       testResults.tests.push({
         name: 'Rate Limiting Test',
@@ -322,7 +335,6 @@ export default async function handler(req, res) {
       
       // Test 5: OTP verification (if any registration succeeded)
       if (singleResult.success || sequentialResults.some(r => r.success)) {
-        console.log('\n🔍 Running Test 5: OTP verification');
         const otpResult = await testOTPAutoVerify();
         testResults.tests.push({
           name: 'OTP Auto-Verification',
@@ -341,7 +353,7 @@ export default async function handler(req, res) {
     // ─────────────────────────────────────────
     // REGISTER ACTION - Create multiple test accounts
     // ─────────────────────────────────────────
-    if (action === 'register') {
+    if (bodyAction === 'register' && req.method === 'POST') {
       const accountsToCreate = Math.min(count, DEMO_NAMES.length);
       const accounts = [];
       const errors = [];
@@ -394,9 +406,7 @@ export default async function handler(req, res) {
     // ─────────────────────────────────────────
     // VERIFY ACTION - Check if email exists
     // ─────────────────────────────────────────
-    if (action === 'verify') {
-      const { email } = req.body;
-      
+    if (bodyAction === 'verify' && req.method === 'POST') {
       if (!email) {
         return res.status(400).json({
           success: false,
@@ -435,8 +445,14 @@ export default async function handler(req, res) {
     // ─────────────────────────────────────────
     return res.status(400).json({
       success: false,
-      error: 'Invalid action. Use: test, register, or verify',
+      error: 'Invalid action or method',
       validActions: ['test', 'register', 'verify'],
+      validMethods: {
+        test: 'POST',
+        register: 'POST',
+        verify: 'POST',
+        status: 'GET'
+      },
       config: {
         testPassword: TEST_PASSWORD,
         emailDomain: TEST_EMAIL_DOMAIN
